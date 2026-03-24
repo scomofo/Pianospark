@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(wc:*)",
+      "Bash(node tests/test_core.js)",
+      "Bash(start:*)"
+    ]
+  }
+}

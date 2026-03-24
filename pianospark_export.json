@@ -1,0 +1,59 @@
+{
+  "xp": 35,
+  "streak": 0,
+  "lastPractice": "Mon Mar 16 2026",
+  "sessions": 1,
+  "chordProg": {
+    "C": 15,
+    "D": 0,
+    "E": 0,
+    "F": 0,
+    "G": 0,
+    "A": 0,
+    "Am": 0,
+    "Dm": 0,
+    "Em": 0,
+    "Bb": 0,
+    "Eb": 0,
+    "Fm": 0,
+    "Cm": 0,
+    "Gm": 0,
+    "C7": 0,
+    "G7": 0,
+    "D7": 0,
+    "Am7": 0,
+    "Cmaj7": 0,
+    "Fmaj7": 0,
+    "Dm7": 0,
+    "Em7": 0,
+    "Cdim": 0,
+    "Caug": 0,
+    "F#m": 0,
+    "Bm": 0,
+    "Dadd9": 0,
+    "A7": 0,
+    "E7": 0
+  },
+  "earned": [
+    "first_chord"
+  ],
+  "level": 1,
+  "history": [
+    {
+      "type": "session",
+      "chord": "C",
+      "dur": 120,
+      "ts": 1773681564464
+    }
+  ],
+  "dailyGoal": 10,
+  "dailyPracticed": 120,
+  "quizCorrect": 0,
+  "drillsDone": 0,
+  "dailiesDone": 0,
+  "songsDone": [],
+  "darkMode": true,
+  "volume": 0.7,
+  "customSets": [],
+  "practiceLen": 120
+}
