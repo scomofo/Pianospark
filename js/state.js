@@ -359,6 +359,9 @@ function resetProgress() {
   var all = allChords();
   for (var j = 0; j < all.length; j++) S.chordProg[all[j].short] = 0;
 
+  // Save immediately so a crash during undo window doesn't lose the reset
+  saveState(true);
+
   // 5-second undo window
   S._undoBackup = backup;
   S._undoTimer = setTimeout(function() {
@@ -418,10 +421,12 @@ function autoExportForJeeves() {
 
 function checkStreak() {
   if (!S.lastPractice) return;
-  var last = new Date(S.lastPractice);
-  var now = new Date();
-  var diffDays = Math.floor((now - last) / 86400000);
-  if (diffDays > 1) S.streak = 0;
+  // Use date strings instead of millisecond math (timezone-safe)
+  var today = new Date().toDateString();
+  var last = S.lastPractice;
+  if (last === today) return; // already counted today
+  var yesterday = new Date(Date.now() - 86400000).toDateString();
+  if (last !== yesterday) S.streak = 0; // missed more than one day — reset
 }
 
 function checkPracticeDate() {
