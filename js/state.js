@@ -144,6 +144,20 @@ var S = {
   songIdx: null,
   songPlaying: false,
   songChordIdx: 0,
+  songSort: "level",
+  songSortAsc: true,
+  songFilter: "",
+  // Stem Separation
+  stemFile: null,
+  stemStatus: "idle",
+  stemProgress: 0,
+  stemError: null,
+  stemPaths: null,
+  stemPlaying: false,
+  stemVolume: 0.8,
+  stemCurrentTime: 0,
+  stemDuration: 0,
+  stemToggles: { vocals:true, drums:true, bass:true, guitar:false, piano:false, other:false },
 
   // Play styles
   styleIdx: 0,
@@ -180,7 +194,14 @@ var S = {
   practiceClips: [],
 };
 
-function saveState() {
+// Debounced save — prevents localStorage thrashing on rapid actions
+var _saveTimer = null;
+function saveState(immediate) {
+  if (immediate) { _doSave(); return; }
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(_doSave, 300);
+}
+function _doSave() {
   var obj = {};
   for (var i = 0; i < PERSIST.length; i++) {
     var k = PERSIST[i];
@@ -189,7 +210,8 @@ function saveState() {
   // Cap history
   if (obj.history && obj.history.length > 500)
     obj.history = obj.history.slice(-500);
-  try { localStorage.setItem("pianospark_state", JSON.stringify(obj)); } catch(e) {}
+  try { localStorage.setItem("pianospark_state", JSON.stringify(obj)); }
+  catch(e) { console.error("PianoSpark: saveState failed", e); }
 }
 
 function loadState() {
@@ -236,7 +258,7 @@ function loadState() {
       if (stringFields.indexOf(k) >= 0 && typeof val !== "string") continue;
       S[k] = val;
     }
-  } catch(e) {}
+  } catch(e) { console.error("PianoSpark: loadState failed — data may be corrupted", e); }
 
   // Init chord progress for all chords
   var all = allChords();
@@ -315,7 +337,8 @@ function resetProgress() {
     var k = PERSIST[i];
     backup[k] = JSON.parse(JSON.stringify(S[k]));
   }
-  try { localStorage.setItem("pianospark_undo", JSON.stringify(backup)); } catch(e) {}
+  try { localStorage.setItem("pianospark_undo", JSON.stringify(backup)); }
+  catch(e) { console.error("PianoSpark: undo backup failed", e); }
 
   S.xp = 0; S.streak = 0; S.sessions = 0; S.level = 1;
   S.chordProg = {}; S.earned = []; S.history = [];
@@ -355,8 +378,8 @@ function recoverFromCrash() {
       if (backup[k] !== undefined) S[k] = backup[k];
     }
     localStorage.removeItem("pianospark_crash");
-    saveState();
-  } catch(e) {}
+    saveState(true);
+  } catch(e) { console.error("PianoSpark: recoverFromCrash failed", e); }
 }
 
 function undoReset() {
@@ -368,7 +391,7 @@ function undoReset() {
   }
   S._undoBackup = null;
   try { localStorage.removeItem("pianospark_undo"); } catch(e) {}
-  saveState();
+  saveState(true);
   return true;
 }
 
@@ -390,7 +413,7 @@ function autoExportForJeeves() {
   for (var i = 0; i < PERSIST.length; i++) obj[PERSIST[i]] = S[PERSIST[i]];
   try {
     localStorage.setItem("pianospark_jeeves_export", JSON.stringify(obj));
-  } catch(e) {}
+  } catch(e) { console.error("PianoSpark: Jeeves export failed", e); }
 }
 
 function checkStreak() {

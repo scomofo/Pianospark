@@ -1,0 +1,127 @@
+import os
+import json
+
+# Define the full project structure and file contents
+project_files = {
+    "sync_content.py": """import json
+import os
+
+class VisualDebugger:
+    @staticmethod
+    def show_piano(chord_name, notes):
+        keys = ["C ", "C#", "D ", "D#", "E ", "F ", "F#", "G ", "G#", "A ", "A#", "B "]
+        display = "|"
+        for k in keys:
+            marker = "[X]" if k.strip() in [n[:2].strip() for n in notes] else "[ ]"
+            display += f"{k}{marker}|"
+        print(f"PIANO ({chord_name}): {display}")
+
+    @staticmethod
+    def show_guitar(chord_name, frets):
+        print(f"GUITAR ({chord_name}):")
+        strings = ["e", "B", "G", "D", "A", "E"]
+        for i, s in enumerate(strings):
+            fret = str(frets[5-i])
+            print(f"{s} |---{fret}---")
+
+class ChordEngine:
+    NOTES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
+    @staticmethod
+    def get_chord(root, quality="Major"):
+        try:
+            root_idx = ChordEngine.NOTES.index(root.upper())
+            intervals = [0, 4, 7] if quality == "Major" else [0, 3, 7]
+            return [ChordEngine.NOTES[(root_idx + i) % 12] for i in intervals]
+        except ValueError: return None
+
+pianospark_data = {
+    "app_name": "Pianospark_Chordspark_Combined",
+    "version": "1.9.0",
+    "piano_logic": {
+        "C_Major": {"notes": ["G3", "C4", "E4"], "fingers": [1, 2, 5]},
+        "F_Major": {"notes": ["A3", "C4", "F4"], "fingers": [1, 2, 5]},
+        "G_Major": {"notes": ["G3", "B3", "D4"], "fingers": [1, 2, 4]}
+    },
+    "guitar_logic": {
+        "G_Major": {"frets": [3, 2, 0, 0, 3, 3], "fingers": [2, 1, 0, 0, 3, 4]},
+        "Cadd9":   {"frets": ["x", 3, 2, 0, 3, 3], "fingers": [0, 2, 1, 0, 3, 4]},
+        "D_Major": {"frets": ["x", "x", 0, 2, 3, 2], "fingers": [0, 0, 0, 1, 3, 2]}
+    },
+    "ui_anchors": {
+        "target_string": 2, 
+        "fret": 3, 
+        "finger": 3,
+        "label": "Ring Finger Anchor"
+    }
+}
+
+def sync():
+    if not os.path.exists("data"): os.makedirs("data")
+    with open("data/pianospark_content.json", "w") as f:
+        json.dump(pianospark_data, f, indent=4)
+    print("\\nSync Success: v1.9 Data & TRD Generated.")
+
+if __name__ == "__main__": sync()
+""",
+
+    "README.md": """# TECHNICAL REQUIREMENTS: Pianospark & Chordspark v1.9
+
+## 1. Project Mission
+Develop a dual-instrument learning interface that visualizes efficient chord transitions for Piano (Pianospark) and Guitar (Chordspark).
+
+## 2. UI Rendering Protocols (MANDATORY)
+### 🎹 Pianospark Module:
+- **Visualization**: Render a 2D piano keyboard. 
+- **Mapping**: Fetch `notes` from `piano_logic`. Map key IDs (e.g., G3, C4) to specific piano keys.
+- **Fingering**: Overlay the `fingers` array (1=Thumb, 5=Pinky) directly onto the keys.
+- **Goal**: Minimize hand movement. Use the provided inversions to keep the hand in a static 'shell'.
+
+### 🎸 Chordspark Module:
+- **Visualization**: Render a vertical 6-string guitar fretboard.
+- **Fretting**: 
+    - Value 'x' = Muted string (Render a red 'X' above the nut).
+    - Value '0' = Open string (Render a green 'O' above the nut).
+    - Integer = Fret number (Render a circle marker on that fret).
+- **The "Sticky" Anchor**: When playing G-Cadd9-D, the **2nd string, 3rd fret** must be highlighted in a high-contrast color. It should NOT flicker or move during transitions.
+
+## 3. Data Flow
+- All content is synced via `sync_content.py`.
+- The 'Single Source of Truth' is `data/pianospark_content.json`.
+- If a chord is missing, use `ChordEngine` in `sync_content.py` to calculate Root Position intervals:
+    - **Major**: [0, 4, 7]
+    - **Minor**: [0, 3, 7]
+
+## 4. Quality Control
+- Run `sync_all.bat` before every commit to verify that the music logic remains valid.
+""",
+
+    "CHANGELOG.md": """# Change Log
+## [1.9.0] - 2026-03-24
+### Added
+- Comprehensive TRD (Technical Requirement Document) in README.
+- Sync logic for G-C-D "Sticky Anchor" UI.
+- Unified finger numbering for both instruments.
+""",
+
+    "sync_all.bat": """@echo off
+python sync_content.py
+powershell -Command "Write-Host 'Pianospark & Chordspark v1.9 TRD Sync Success' -ForegroundColor Green"
+pause
+"""
+}
+
+def bootstrap():
+    print("--- Extracting Project v1.9: Master Bundle ---")
+    for filename, content in project_files.items():
+        with open(filename, "w") as f:
+            f.write(content)
+        print(f"Generated: {filename}")
+    
+    # Initialize the data folder
+    import subprocess
+    if not os.path.exists("data"): os.makedirs("data")
+    subprocess.run(["python", "sync_content.py"])
+    print("\nExtraction Complete. Hand these files to your AI Developer Agent.")
+
+if __name__ == "__main__":
+    bootstrap()

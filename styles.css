@@ -1136,3 +1136,16 @@ button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* ── Selection ── */
 ::selection { background: var(--accent-light); color: #fff; }
+
+/* ── Responsive: Wider Screens ── */
+@media (min-width: 600px) {
+  body { max-width: 600px; margin: 0 auto; }
+}
+@media (min-width: 900px) {
+  body { max-width: 800px; }
+  .song-list { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+}
+@media (min-width: 1200px) {
+  body { max-width: 1000px; }
+  .song-list { grid-template-columns: 1fr 1fr 1fr; }
+}

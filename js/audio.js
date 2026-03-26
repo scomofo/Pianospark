@@ -1031,3 +1031,110 @@ function getMidiInputNames() {
   midiAccess.inputs.forEach(function(input) { names.push(input.name); });
   return names;
 }
+
+// ===== STEM PLAYBACK =====
+var _stemAudios = {};
+var _stemTimeUpdater = null;
+var STEM_NAMES = ["vocals","drums","bass","guitar","piano","other"];
+var STEM_COLORS = {vocals:"#FF6B6B",drums:"#FFE66D",bass:"#4ECDC4",guitar:"#FF8A5C",piano:"#45B7D1",other:"#A78BFA"};
+var STEM_ICONS = {vocals:"\u{1F3A4}",drums:"\u{1F941}",bass:"\u{1F3B8}",guitar:"\u{1F3BA}",piano:"\u{1F3B9}",other:"\u{1F3B6}"};
+
+function loadStemUrls(urlMap) {
+  cleanupStems();
+  var keys = Object.keys(urlMap);
+  for (var i = 0; i < keys.length; i++) {
+    var name = keys[i];
+    var audio = new Audio();
+    audio.preload = "auto";
+    audio.src = urlMap[name];
+    audio.muted = !S.stemToggles[name];
+    audio.volume = S.stemVolume;
+    _stemAudios[name] = audio;
+  }
+  var first = _stemAudios[keys[0]];
+  if (first) {
+    first.addEventListener("loadedmetadata", function() {
+      S.stemDuration = first.duration;
+      render();
+    });
+  }
+}
+
+function _loadStemFileUrls(paths) {
+  if (!window.electron || !paths) return;
+  var names = Object.keys(paths);
+  var urlMap = {};
+  var loaded = 0;
+  for (var i = 0; i < names.length; i++) {
+    (function(name) {
+      window.electron.stems.getFileUrl(paths[name]).then(function(url) {
+        urlMap[name] = url;
+        loaded++;
+        if (loaded === names.length) {
+          loadStemUrls(urlMap);
+          S.stemStatus = "ready";
+          for (var j = 0; j < STEM_NAMES.length; j++) {
+            var sn = STEM_NAMES[j];
+            if (urlMap[sn]) setStemMuted(sn, !S.stemToggles[sn]);
+          }
+          setStemVolume(S.stemVolume);
+        }
+      });
+    })(names[i]);
+  }
+}
+
+function playStems() {
+  var keys = Object.keys(_stemAudios);
+  if (keys.length === 0) return;
+  for (var i = 0; i < keys.length; i++) {
+    _stemAudios[keys[i]].play().catch(function(){});
+  }
+  S.stemPlaying = true;
+  clearInterval(_stemTimeUpdater);
+  _stemTimeUpdater = setInterval(function() {
+    var first = _stemAudios[Object.keys(_stemAudios)[0]];
+    if (first) {
+      S.stemCurrentTime = first.currentTime;
+      if (first.ended) { S.stemPlaying = false; clearInterval(_stemTimeUpdater); }
+      render();
+    }
+  }, 250);
+  render();
+}
+
+function pauseStems() {
+  var keys = Object.keys(_stemAudios);
+  for (var i = 0; i < keys.length; i++) _stemAudios[keys[i]].pause();
+  S.stemPlaying = false;
+  clearInterval(_stemTimeUpdater);
+  render();
+}
+
+function seekStems(time) {
+  var keys = Object.keys(_stemAudios);
+  for (var i = 0; i < keys.length; i++) _stemAudios[keys[i]].currentTime = time;
+  S.stemCurrentTime = time;
+  render();
+}
+
+function setStemMuted(name, muted) {
+  if (_stemAudios[name]) _stemAudios[name].muted = muted;
+}
+
+function setStemVolume(vol) {
+  var keys = Object.keys(_stemAudios);
+  for (var i = 0; i < keys.length; i++) _stemAudios[keys[i]].volume = vol;
+}
+
+function cleanupStems() {
+  var keys = Object.keys(_stemAudios);
+  for (var i = 0; i < keys.length; i++) {
+    try { _stemAudios[keys[i]].pause(); _stemAudios[keys[i]].src = ""; } catch(e) {}
+  }
+  _stemAudios = {};
+  clearInterval(_stemTimeUpdater);
+  S.stemPlaying = false;
+  S.stemCurrentTime = 0;
+  S.stemDuration = 0;
+}

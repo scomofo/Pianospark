@@ -247,32 +247,13 @@ function styleHTML(styleObj) {
 // ── Badge checking (expanded for 8 levels) ──
 function checkBadges() {
   var newBadges = [];
-  function check(id, cond) {
-    if (cond && S.earned.indexOf(id) < 0) {
-      S.earned.push(id);
-      newBadges.push(id);
+  for (var i = 0; i < BADGES.length; i++) {
+    var b = BADGES[i];
+    if (b.check && b.check() && S.earned.indexOf(b.id) < 0) {
+      S.earned.push(b.id);
+      newBadges.push(b.id);
     }
   }
-
-  check("first_chord", S.sessions >= 1 || S.completedSessions.length >= 1);
-  check("streak_3", S.streak >= 3);
-  check("streak_7", S.streak >= 7);
-  check("streak_30", S.streak >= 30);
-  check("level_2", S.level >= 2);
-  check("level_3", S.level >= 3);
-  check("level_4", S.level >= 4);
-  check("level_5", S.level >= 5);
-  check("level_6", S.level >= 6);
-  check("level_7", S.level >= 7);
-  check("level_8", S.level >= 8);
-  check("sessions_10", S.sessions >= 10 || S.completedSessions.length >= 10);
-  check("sessions_25", S.sessions >= 25 || S.completedSessions.length >= 25);
-  check("sessions_50", S.completedSessions.length >= 50);
-  check("drills_5", S.drillsDone >= 5);
-  check("songs_3", S.songsDone && S.songsDone.length >= 3);
-  check("songs_10", S.songsDone && S.songsDone.length >= 10);
-  check("jackpot", S.jackpotsHit >= 1);
-
   if (newBadges.length) {
     saveState();
     playSound("badge");

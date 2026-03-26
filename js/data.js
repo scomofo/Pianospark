@@ -1281,26 +1281,28 @@ var SONGS = [
 ];
 
 // ── BADGES (expanded 15+) ──
+// Each badge has a check() function so checkBadges() in ui.js is data-driven.
+// To add a badge: add it here only — no other file needs updating.
 var BADGES = [
-  { id:"first_chord",  label:"First Note",     icon:"\u{1F3B9}", desc:"Complete Session 1" },
-  { id:"streak_3",     label:"On Fire!",        icon:"\u{1F525}", desc:"3-day streak" },
-  { id:"streak_7",     label:"Unstoppable",     icon:"\u{1F31F}", desc:"7-day streak" },
-  { id:"streak_30",    label:"Iron Will",       icon:"\u{1F48E}", desc:"30-day streak" },
-  { id:"level_2",      label:"Neighbor Chords", icon:"\u{1F3E0}", desc:"Reach Level 2" },
-  { id:"level_3",      label:"Emotional",       icon:"\u{1F3AD}", desc:"Reach Level 3" },
-  { id:"level_4",      label:"Full Palette",    icon:"\u{1F3A8}", desc:"Reach Level 4" },
-  { id:"level_5",      label:"Black Keys",      icon:"\u{2B50}",  desc:"Reach Level 5" },
-  { id:"level_6",      label:"Flat Side",       icon:"\u{1F30A}", desc:"Reach Level 6" },
-  { id:"level_7",      label:"Color Master",    icon:"\u{1F308}", desc:"Reach Level 7" },
-  { id:"level_8",      label:"Graduate",        icon:"\u{1F393}", desc:"Reach Level 8" },
-  { id:"sessions_10",  label:"Dedicated",       icon:"\u{1F4AA}", desc:"Complete 10 sessions" },
-  { id:"sessions_25",  label:"Halfway",         icon:"\u{1F3C3}", desc:"Complete 25 sessions" },
-  { id:"sessions_50",  label:"Maestro",         icon:"\u{1F3C6}", desc:"Complete all 50 sessions" },
-  { id:"drills_5",     label:"Quick Fingers",   icon:"\u{26A1}",  desc:"Complete 5 drills" },
-  { id:"songs_3",      label:"Performer",       icon:"\u{1F3B6}", desc:"Practice 3 songs" },
-  { id:"songs_10",     label:"Repertoire",      icon:"\u{1F4DA}", desc:"Practice 10 songs" },
+  { id:"first_chord",  label:"First Note",     icon:"\u{1F3B9}", desc:"Complete Session 1", check:function(){return S.sessions>=1||S.completedSessions.length>=1;} },
+  { id:"streak_3",     label:"On Fire!",        icon:"\u{1F525}", desc:"3-day streak", check:function(){return S.streak>=3;} },
+  { id:"streak_7",     label:"Unstoppable",     icon:"\u{1F31F}", desc:"7-day streak", check:function(){return S.streak>=7;} },
+  { id:"streak_30",    label:"Iron Will",       icon:"\u{1F48E}", desc:"30-day streak", check:function(){return S.streak>=30;} },
+  { id:"level_2",      label:"Neighbor Chords", icon:"\u{1F3E0}", desc:"Reach Level 2", check:function(){return S.level>=2;} },
+  { id:"level_3",      label:"Emotional",       icon:"\u{1F3AD}", desc:"Reach Level 3", check:function(){return S.level>=3;} },
+  { id:"level_4",      label:"Full Palette",    icon:"\u{1F3A8}", desc:"Reach Level 4", check:function(){return S.level>=4;} },
+  { id:"level_5",      label:"Black Keys",      icon:"\u{2B50}",  desc:"Reach Level 5", check:function(){return S.level>=5;} },
+  { id:"level_6",      label:"Flat Side",       icon:"\u{1F30A}", desc:"Reach Level 6", check:function(){return S.level>=6;} },
+  { id:"level_7",      label:"Color Master",    icon:"\u{1F308}", desc:"Reach Level 7", check:function(){return S.level>=7;} },
+  { id:"level_8",      label:"Graduate",        icon:"\u{1F393}", desc:"Reach Level 8", check:function(){return S.level>=8;} },
+  { id:"sessions_10",  label:"Dedicated",       icon:"\u{1F4AA}", desc:"Complete 10 sessions", check:function(){return S.sessions>=10||S.completedSessions.length>=10;} },
+  { id:"sessions_25",  label:"Halfway",         icon:"\u{1F3C3}", desc:"Complete 25 sessions", check:function(){return S.sessions>=25||S.completedSessions.length>=25;} },
+  { id:"sessions_50",  label:"Maestro",         icon:"\u{1F3C6}", desc:"Complete all 50 sessions", check:function(){return S.completedSessions.length>=50;} },
+  { id:"drills_5",     label:"Quick Fingers",   icon:"\u{26A1}",  desc:"Complete 5 drills", check:function(){return S.drillsDone>=5;} },
+  { id:"songs_3",      label:"Performer",       icon:"\u{1F3B6}", desc:"Practice 3 songs", check:function(){return S.songsDone&&S.songsDone.length>=3;} },
+  { id:"songs_10",     label:"Repertoire",      icon:"\u{1F4DA}", desc:"Practice 10 songs", check:function(){return S.songsDone&&S.songsDone.length>=10;} },
   { id:"comeback",     label:"Comeback Kid",    icon:"\u{1F49A}", desc:"Return after 3+ days" },
-  { id:"jackpot",      label:"Lucky Break",     icon:"\u{1F340}", desc:"Hit a jackpot reward" },
+  { id:"jackpot",      label:"Lucky Break",     icon:"\u{1F340}", desc:"Hit a jackpot reward", check:function(){return S.jackpotsHit>=1;} },
   { id:"speed_demon",  label:"Speed Demon",     icon:"\u{1F680}", desc:"Beat your personal best BPM" }
 ];
 

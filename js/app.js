@@ -282,7 +282,7 @@ function buildTick() {
 // ── Guided session flow ──
 function startGuidedSession() {
   var plan = getCurrentSessionPlan();
-  if (!plan) { showToast("No more sessions!"); return; }
+  if (!plan) { showToast("No more sessions!"); render(); return; }
 
   S.sessionPlan = plan;
   S.screen = SCR.SESSION;
@@ -296,6 +296,7 @@ function startGuidedSession() {
   checkPracticeDate();
   playSound("start");
   saveState();
+  render();
 }
 
 function advanceSessionStep() {
@@ -897,6 +898,13 @@ function act(action, param) {
       break;
 
     // ── Songs ──
+    case "song_sort":
+      if (S.songSort === param) { S.songSortAsc = !S.songSortAsc; }
+      else { S.songSort = param; S.songSortAsc = true; }
+      break;
+    case "song_filter":
+      S.songFilter = param || "";
+      break;
     case "select_song":
       S.songIdx = parseInt(param);
       S.songChordIdx = 0;
@@ -927,6 +935,68 @@ function act(action, param) {
       if (T.song) { clearInterval(T.song); T.song = null; }
       stopMetronome();
       break;
+
+    // ── Stems ──
+    case "stemOpenFile":
+      if (!window.electron) break;
+      S.stemError = null; render();
+      window.electron.stems.openFile().then(function(result) {
+        if (!result) return;
+        S.stemFile = result; S.stemStatus = "idle"; render();
+        window.electron.stems.checkCache(result.filePath).then(function(cached) {
+          if (cached) {
+            S.stemPaths = cached;
+            _loadStemFileUrls(cached);
+          } else {
+            act("stemSeparate");
+          }
+        });
+      });
+      break;
+    case "stemSeparate":
+      if (!window.electron || !S.stemFile) break;
+      S.stemStatus = "separating"; S.stemProgress = 0; S.stemError = null; render();
+      var removeProgress = window.electron.stems.onProgress(function(data) {
+        var match = data.line.match(/(\d+)%/);
+        if (match) { S.stemProgress = parseInt(match[1]); render(); }
+      });
+      window.electron.stems.separate(S.stemFile.filePath).then(function(result) {
+        removeProgress();
+        S.stemPaths = result.stemPaths;
+        _loadStemFileUrls(result.stemPaths);
+        render();
+      }).catch(function(err) {
+        removeProgress();
+        S.stemStatus = "error"; S.stemError = err.message; render();
+      });
+      break;
+    case "stemCancel":
+      if (window.electron) window.electron.stems.cancel();
+      S.stemStatus = "idle"; S.stemProgress = 0; render();
+      break;
+    case "stemOpen":
+      S.screen = 3; render(); break; // screen 3 = stem player
+    case "stemBack":
+      cleanupStems(); S.screen = SCR.HOME; S.tab = TAB.SONGS; S._songTab = "stems"; render();
+      break;
+    case "stemToggle":
+      S.stemToggles[param] = !S.stemToggles[param];
+      setStemMuted(param, !S.stemToggles[param]);
+      break;
+    case "stemSolo":
+      for (var sk in S.stemToggles) S.stemToggles[sk] = (sk === param);
+      for (var sk in S.stemToggles) setStemMuted(sk, !S.stemToggles[sk]);
+      break;
+    case "stemAll":
+      for (var sk in S.stemToggles) { S.stemToggles[sk] = true; setStemMuted(sk, false); }
+      break;
+    case "stemPlay":
+      if (S.stemPlaying) pauseStems(); else playStems();
+      break;
+    case "stemSeek":
+      seekStems(parseFloat(param)); break;
+    case "stemVolume":
+      S.stemVolume = parseFloat(param); setStemVolume(S.stemVolume); break;
 
     // ── Rhythm ──
     case "start_rhythm":
@@ -1153,6 +1223,12 @@ function render() {
   // Session screen
   if (S.screen === SCR.SESSION && S.sessionPlan) {
     root.innerHTML = headerHTML() + sessionPage();
+    return;
+  }
+
+  // Stem player screen
+  if (S.screen === 3) {
+    root.innerHTML = headerHTML() + stemsPlayerPage();
     return;
   }
 
