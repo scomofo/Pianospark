@@ -13,18 +13,24 @@
   "license": "MIT",
   "devDependencies": {
     "electron": "^33.4.11",
-    "electron-builder": "^25.0.0"
+    "electron-builder": "^25.0.0",
+    "electron-packager": "^17.1.2"
   },
   "build": {
     "appId": "com.pianospark.app",
     "productName": "PianoSpark",
     "mac": {
-      "target": ["dmg"],
+      "target": [
+        "zip"
+      ],
       "icon": "icon.png",
-      "category": "public.app-category.music"
+      "category": "public.app-category.music",
+      "artifactName": "${productName}-${version}-mac-${arch}.${ext}"
     },
     "win": {
-      "target": ["nsis"],
+      "target": [
+        "nsis"
+      ],
       "icon": "icon.png"
     },
     "nsis": {
@@ -46,7 +52,9 @@
       {
         "from": "resources/",
         "to": "resources/",
-        "filter": ["**/*"]
+        "filter": [
+          "**/*"
+        ]
       }
     ]
   }
