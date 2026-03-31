@@ -742,6 +742,8 @@ body.focus-mode .app-header { padding: 8px 4px; }
 .perform-event-hit .perform-event-label { color: var(--success); }
 .perform-event-miss { opacity: 0.35; border-color: var(--danger); }
 .perform-event-miss .perform-event-label { color: var(--danger); text-decoration: line-through; }
+.perform-event-lh { left: 22%; right: 22%; min-height: 34px; }
+.perform-event-chord { left: 12%; right: 12%; min-height: 42px; }
 
 /* ── Responsive ── */
 @media (max-width: 400px) {

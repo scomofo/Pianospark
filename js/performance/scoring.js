@@ -5,6 +5,9 @@
     if(event.type==="block_chord"){
       return scoreBlockChordEvent(event, snapshot, hitDeltaMs, diff);
     }
+    if(event.type==="lh_note"){
+      return scoreLHNoteEvent(event, snapshot, hitDeltaMs, diff);
+    }
     return { score:0, grade:"miss", noteScore:0, timingScore:0, hitDeltaMs:hitDeltaMs };
   }
 
@@ -38,6 +41,28 @@
     var ratio = matched / target.length;
     if(allowPartial) return ratio;
     return matched===target.length ? 1 : 0;
+  }
+
+  function scoreLHNoteEvent(event, snapshot, hitDeltaMs, diff){
+    var targetMidi = event.target && event.target.midi;
+    var exact = (snapshot.heldMidiNotes || []).indexOf(targetMidi)!==-1;
+    var noteScore = exact ? 1 : 0;
+
+    var abs = Math.abs(hitDeltaMs);
+    var timingScore = 0;
+    if(abs<=diff.perfectMs) timingScore = 1;
+    else if(abs<=diff.goodMs) timingScore = 0.7;
+    else if(abs<=diff.missMs) timingScore = 0.35;
+
+    var total = noteScore * diff.noteWeight + timingScore * diff.timingWeight;
+
+    return {
+      score: total,
+      grade: gradePerformanceScore(total),
+      noteScore: noteScore,
+      timingScore: timingScore,
+      hitDeltaMs: hitDeltaMs
+    };
   }
 
   function gradePerformanceScore(score){

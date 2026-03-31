@@ -16,6 +16,20 @@ function performSongPage(){
   h += '</div>';
 
   h += '<div class="card mb16">';
+  h += '<div><b>Arrangement</b></div>';
+  h += '<button class="btn'+(S.performArrangementType==="block_chords"?" btn-primary":"")+'" onclick="act(\'performArrangement\',\'block_chords\')">Block Chords</button> ';
+  h += '<button class="btn'+(S.performArrangementType==="left_hand_patterns"?" btn-primary":"")+'" onclick="act(\'performArrangement\',\'left_hand_patterns\')">Left Hand</button>';
+  h += '</div>';
+
+  if(S.performArrangementType==="left_hand_patterns"){
+    var pat = typeof getCurrentLHPattern==="function" ? getCurrentLHPattern() : null;
+    h += '<div class="card mb16">';
+    h += '<div><b>LH Pattern</b></div>';
+    h += '<div class="muted">'+escHTML(pat ? pat.name : "Unknown pattern")+'</div>';
+    h += '</div>';
+  }
+
+  h += '<div class="card mb16">';
   h += '<div><b>Difficulty</b></div>';
   h += '<button class="btn'+(S.performDifficulty==="easy"?" btn-primary":"")+'" onclick="act(\'performDifficulty\',\'easy\')">Easy</button> ';
   h += '<button class="btn'+(S.performDifficulty==="normal"?" btn-primary":"")+'" onclick="act(\'performDifficulty\',\'normal\')">Normal</button> ';

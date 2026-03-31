@@ -1015,8 +1015,12 @@ function act(action, param) {
       applyPerformanceDifficultyToState(param || "normal");
       saveState();
       break;
+    case "performArrangement":
+      S.performArrangementType = param || "block_chords";
+      saveState();
+      break;
     case "performStart": {
-      var chart = buildPerformanceChartFromSong(S.performSongData);
+      var chart = buildPerformanceChartFromSong(S.performSongData, S.performArrangementType);
       startPerformance(chart, {
         difficulty:S.performDifficulty,
         speed:S.performSpeed || 1
@@ -1031,7 +1035,7 @@ function act(action, param) {
       return;
     case "performRetry":
       if(S.performSongData){
-        var chart = buildPerformanceChartFromSong(S.performSongData);
+        var chart = buildPerformanceChartFromSong(S.performSongData, S.performArrangementType);
         startPerformance(chart, {
           difficulty:S.performDifficulty,
           speed:S.performSpeed || 1
