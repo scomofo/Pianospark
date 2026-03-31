@@ -2,7 +2,7 @@
 /* Complete rebuild: 8-level curriculum, 50 sessions, LH patterns, reward engine */
 
 // Screen & tab constants
-var SCR = { HOME: 0, SESSION: 1, ONBOARDING: 2, STEM_PLAYER: 3 };
+var SCR = { HOME: 0, SESSION: 1, ONBOARDING: 2, STEM_PLAYER: 3, PERFORM: 4, PERFORM_DONE: 5, PERFORM_SONG: 6 };
 var TAB = {
   PRACTICE: 0, GAMES: 1, SONGS: 2, TOOLS: 3
 };

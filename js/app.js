@@ -999,6 +999,52 @@ function act(action, param) {
     case "stemVolume":
       S.stemVolume = parseFloat(param); setStemVolume(S.stemVolume); break;
 
+    // ── Performance Mode ──
+    case "open_perform_song": {
+      var idx = parseInt(param);
+      var song = SONGS[idx];
+      if(song){
+        S.performSongData = song;
+        S.performSongId = normalizeSongId(song);
+        S.performArrangementType = "block_chords";
+        S.screen = SCR.PERFORM_SONG;
+      }
+      break;
+    }
+    case "performDifficulty":
+      applyPerformanceDifficultyToState(param || "normal");
+      saveState();
+      break;
+    case "performStart": {
+      var chart = buildPerformanceChartFromSong(S.performSongData);
+      startPerformance(chart, {
+        difficulty:S.performDifficulty,
+        speed:S.performSpeed || 1
+      });
+      return;
+    }
+    case "pausePerform":
+      pausePerformance();
+      return;
+    case "resumePerform":
+      resumePerformance();
+      return;
+    case "performRetry":
+      if(S.performSongData){
+        var chart = buildPerformanceChartFromSong(S.performSongData);
+        startPerformance(chart, {
+          difficulty:S.performDifficulty,
+          speed:S.performSpeed || 1
+        });
+      }
+      return;
+    case "stopPerform":
+      stopPerformance();
+      S.screen = SCR.HOME;
+      S.tab = TAB.SONGS;
+      render();
+      return;
+
     // ── Rhythm ──
     case "start_rhythm":
       S.rhythmActive = true;
@@ -1230,6 +1276,20 @@ function render() {
   // Stem player screen
   if (S.screen === SCR.STEM_PLAYER) {
     root.innerHTML = headerHTML() + stemsPlayerPage();
+    return;
+  }
+
+  // Performance mode screens
+  if (S.screen === SCR.PERFORM_SONG) {
+    root.innerHTML = headerHTML() + performSongPage();
+    return;
+  }
+  if (S.screen === SCR.PERFORM) {
+    root.innerHTML = headerHTML() + performPage();
+    return;
+  }
+  if (S.screen === SCR.PERFORM_DONE) {
+    root.innerHTML = headerHTML() + performDonePage();
     return;
   }
 

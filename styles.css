@@ -733,6 +733,16 @@ body.focus-mode .app-header { padding: 8px 4px; }
 [role="button"]:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 ::selection { background: var(--accent-light); color: #fff; }
 
+/* ── Performance Highway ── */
+.perform-highway { position: relative; height: 500px; overflow: hidden; background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--border); }
+.perform-hitline { position: absolute; top: 300px; left: 0; right: 0; height: 2px; background: var(--accent); opacity: 0.6; z-index: 2; }
+.perform-event { position: absolute; left: 10%; right: 10%; height: 48px; display: flex; align-items: center; justify-content: center; background: var(--accent-bg); border: 1px solid var(--accent-light); border-radius: var(--radius-sm); transition: opacity 0.15s; z-index: 1; }
+.perform-event-label { font-size: 0.88rem; font-weight: 600; color: var(--text-primary); }
+.perform-event-hit { background: rgba(90,158,106,0.25); border-color: var(--success); }
+.perform-event-hit .perform-event-label { color: var(--success); }
+.perform-event-miss { opacity: 0.35; border-color: var(--danger); }
+.perform-event-miss .perform-event-label { color: var(--danger); text-decoration: line-through; }
+
 /* ── Responsive ── */
 @media (max-width: 400px) {
   #app { padding: 8px; }

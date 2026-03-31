@@ -1027,6 +1027,11 @@ function _handleMidiMessage(event) {
     return; // ignore other MIDI messages
   }
 
+  // Forward to performance input if in performance mode
+  if(typeof PerformanceInput!=="undefined" && S.screen===SCR.PERFORM){
+    try{ PerformanceInput.onMidiMessage(event); }catch(e){}
+  }
+
   // Rebuild S.detectedNotes from held pitch classes
   var held = Object.keys(midiNotesHeld).map(Number);
   var noteNames = [];

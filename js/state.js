@@ -19,6 +19,9 @@ var PERSIST = [
   "bpm","quizTotal",
   // MIDI
   "midiEnabled",
+  // Performance mode
+  "performMode","performDifficulty","performArrangementType","performSpeed",
+  "performanceStats","performanceHistory",
   // Audio
   "reverbAmount","metronomeSound","a4Tuning","pitchDetectionMode"
 ];
@@ -192,6 +195,37 @@ var S = {
 
   // Practice clips (session-only; object URLs don't survive reload)
   practiceClips: [],
+
+  // Performance mode
+  performMode:"midi",
+  performDifficulty:"normal",
+  performSongId:null,
+  performSongData:null,
+  performArrangementType:"block_chords",
+  performChartId:null,
+  performChart:null,
+  performPlaying:false,
+  performPaused:false,
+  performCurrentSec:0,
+  performSpeed:1.0,
+  performScrollSpeed:180,
+  performScore:0,
+  performCombo:0,
+  performMaxCombo:0,
+  performAccuracy:0,
+  performPhraseIdx:0,
+  performPhraseStats:[],
+  performResults:null,
+  performStarRating:0,
+  performInputNotes:[],
+  performInputMidi:[],
+  performLoop:null,
+  performWindowPerfectMs:70,
+  performWindowGoodMs:140,
+  performWindowMissMs:220,
+  performanceStats:{},
+  performanceHistory:[],
+  performanceLastSummary:null,
 };
 
 // Debounced save — prevents localStorage thrashing on rapid actions
