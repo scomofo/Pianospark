@@ -223,7 +223,8 @@ function genQuiz() {
   if (pool.length < 4) pool = chordsUpToLevel(3);
   var answer = pool[Math.floor(Math.random() * pool.length)].short;
   // Shuffle pool then pick up to 3 distractors — avoids infinite loop if pool is small
-  var shuffled = pool.slice().sort(function() { return Math.random() - 0.5; });
+  var shuffled = pool.slice();
+  for (var si = shuffled.length - 1; si > 0; si--) { var sj = Math.floor(Math.random() * (si + 1)); var st = shuffled[si]; shuffled[si] = shuffled[sj]; shuffled[sj] = st; }
   var options = [answer];
   for (var i = 0; i < shuffled.length && options.length < 4; i++) {
     if (shuffled[i].short !== answer) options.push(shuffled[i].short);
@@ -751,7 +752,7 @@ function act(action, param) {
       }
       S.drillChords = chords;
       S.drillIdx = 0;
-      S.drillTimer = 60;
+      S.drillTimer = 30;
       S.drillActive = true;
       playSound("start");
       if (T.drill) clearInterval(T.drill);
@@ -764,7 +765,7 @@ function act(action, param) {
       if (set) {
         S.drillChords = set.chords.slice();
         S.drillIdx = 0;
-        S.drillTimer = 60;
+        S.drillTimer = 30;
         S.drillActive = true;
         playSound("start");
         if (T.drill) clearInterval(T.drill);
@@ -975,7 +976,7 @@ function act(action, param) {
       S.stemStatus = "idle"; S.stemProgress = 0; render();
       break;
     case "stemOpen":
-      S.screen = 3; render(); break; // screen 3 = stem player
+      S.screen = SCR.STEM_PLAYER; render(); break;
     case "stemBack":
       cleanupStems(); S.screen = SCR.HOME; S.tab = TAB.SONGS; S._songTab = "stems"; render();
       break;
@@ -1227,7 +1228,7 @@ function render() {
   }
 
   // Stem player screen
-  if (S.screen === 3) {
+  if (S.screen === SCR.STEM_PLAYER) {
     root.innerHTML = headerHTML() + stemsPlayerPage();
     return;
   }

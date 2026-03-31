@@ -27,7 +27,7 @@ function tabNavHTML() {
   var html = '<nav class="tab-nav" role="tablist">';
   tabs.forEach(function(t) {
     var active = S.tab === t.id ? "active" : "";
-    html += '<button class="tab-btn ' + active + '" role="tab" onclick="act(\'tab\',' + t.id + ')">' + t.icon + ' ' + t.label + '</button>';
+    html += '<button class="tab-btn ' + active + '" role="tab" aria-selected="' + (S.tab === t.id ? 'true' : 'false') + '" onclick="act(\'tab\',' + t.id + ')">' + t.icon + ' ' + t.label + '</button>';
   });
   html += '</nav>';
   return html;

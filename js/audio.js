@@ -509,20 +509,30 @@ function _metronomeClick(ctx, now, isAccent) {
   }
 }
 
+var _metroNextTime = 0;
+var _metroLookahead = 0.1; // seconds to look ahead
+var _metroBpm = 120;
 function startMetronome(bpm) {
   stopMetronome();
-  var interval = 60000 / bpm;
+  _metroBpm = bpm;
   metronomeBeat = 0;
-  metronomeInterval = setInterval(function() {
-    var ctx = ensureAudio();
-    var now = ctx.currentTime;
-    _metronomeClick(ctx, now, metronomeBeat % 4 === 0);
+  var ctx = ensureAudio();
+  _metroNextTime = ctx.currentTime;
+  _metroScheduleAhead();
+}
+function _metroScheduleAhead() {
+  var ctx = ensureAudio();
+  var secPerBeat = 60 / _metroBpm;
+  while (_metroNextTime < ctx.currentTime + _metroLookahead) {
+    _metronomeClick(ctx, _metroNextTime, metronomeBeat % 4 === 0);
     metronomeBeat++;
-  }, interval);
+    _metroNextTime += secPerBeat;
+  }
+  metronomeInterval = setTimeout(_metroScheduleAhead, 25);
 }
 
 function stopMetronome() {
-  if (metronomeInterval) { clearInterval(metronomeInterval); metronomeInterval = null; }
+  if (metronomeInterval) { clearTimeout(metronomeInterval); metronomeInterval = null; }
   metronomeBeat = 0;
 }
 
@@ -872,6 +882,7 @@ function stopYinDetection() {
 var _recorder = null;
 var _recordChunks = [];
 var _recordingStartTime = 0;
+var _recordDest = null;
 var CLIP_MAX_MS = 30000; // 30 seconds max
 
 function startRecording() {
@@ -879,8 +890,10 @@ function startRecording() {
   var ctx = ensureAudio();
 
   // Capture the master output via a MediaStreamDestinationNode
-  var dest = ctx.createMediaStreamDestination();
-  masterGain.connect(dest);
+  if (_recordDest) { try { masterGain.disconnect(_recordDest); } catch(e) {} }
+  _recordDest = ctx.createMediaStreamDestination();
+  masterGain.connect(_recordDest);
+  var dest = _recordDest;
 
   _recordChunks = [];
   _recordingStartTime = Date.now();

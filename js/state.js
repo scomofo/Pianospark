@@ -63,7 +63,7 @@ var S = {
   // Settings
   darkMode: false,
   volume: 0.7,
-  practiceLen: 120,
+  practiceLen: 60,
   dailyGoal: 10,   // minutes
   dailyPracticed: 0, // seconds today
   bpm: 80,
@@ -282,6 +282,11 @@ function loadState() {
   if (typeof S.fingerStats !== "object" || S.fingerStats === null) S.fingerStats = {};
 
   checkStreak();
+  // Reset daily counter if date has changed (so dashboard shows 0 before first practice)
+  var today = new Date().toDateString();
+  if (S.lastPractice && S.lastPractice !== today) {
+    S.dailyPracticed = 0;
+  }
 }
 
 // Migrate from old 3-level format to new 8-level curriculum
@@ -407,7 +412,9 @@ function exportState() {
   var a = document.createElement("a");
   a.href = url;
   a.download = "pianospark_export.json";
+  document.body.appendChild(a);
   a.click();
+  document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
 
