@@ -999,6 +999,14 @@ function act(action, param) {
     case "stemVolume":
       S.stemVolume = parseFloat(param); setStemVolume(S.stemVolume); break;
 
+    // ── Practice Plan ──
+    case "openPlan":
+      S.screen = SCR.PLAN; break;
+    case "completePlan":
+      completePracticePlan(); break;
+    case "regeneratePlan":
+      buildPracticePlan(); break;
+
     // ── Performance Mode ──
     case "open_perform_song": {
       var idx = parseInt(param);
@@ -1280,6 +1288,12 @@ function render() {
   // Stem player screen
   if (S.screen === SCR.STEM_PLAYER) {
     root.innerHTML = headerHTML() + stemsPlayerPage();
+    return;
+  }
+
+  // Practice plan screen
+  if (S.screen === SCR.PLAN) {
+    root.innerHTML = headerHTML() + planPage();
     return;
   }
 

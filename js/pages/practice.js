@@ -18,6 +18,11 @@ function practiceTab() {
   html += '<div class="progress-bar"><div class="progress-fill" style="width:' + goalPct + '%"></div></div>';
   html += '</div>';
 
+  // Practice Plan CTA
+  html += '<div style="text-align:center;margin:8px 0">';
+  html += '<button class="btn" onclick="act(\'openPlan\')" style="background:var(--accent);color:#fff;font-weight:700">Today\'s Practice Plan</button>';
+  html += '</div></div>';
+
   // Quick start / Resume session card
   var plan = getCurrentSessionPlan();
   if (plan) {

@@ -22,6 +22,8 @@ var PERSIST = [
   // Performance mode
   "performMode","performDifficulty","performArrangementType","performSpeed",
   "performanceStats","performanceHistory",
+  // Practice plan
+  "practicePlan","practicePlanDate","practicePlanHistory",
   // Audio
   "reverbAmount","metronomeSound","a4Tuning","pitchDetectionMode"
 ];
@@ -226,6 +228,13 @@ var S = {
   performanceStats:{},
   performanceHistory:[],
   performanceLastSummary:null,
+
+  // Practice plan
+  practicePlan:null,
+  practicePlanDate:null,
+  practicePlanComplete:false,
+  practicePlanHistory:[],
+  practicePlanFocus:"",
 };
 
 // Debounced save — prevents localStorage thrashing on rapid actions
