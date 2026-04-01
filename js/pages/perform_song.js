@@ -36,6 +36,28 @@ function performSongPage(){
   h += '<button class="btn'+(S.performDifficulty==="pro"?" btn-primary":"")+'" onclick="act(\'performDifficulty\',\'pro\')">Pro</button>';
   h += '</div>';
 
+  // Audio import
+  var songId = normalizeSongId(S.performSongData);
+  var audioData = S.songAudioData[songId];
+
+  h += '<div class="card mb16">';
+  h += '<div><b>Song Audio</b></div>';
+
+  if (audioData && audioData.stemPaths) {
+    h += '<div style="color:#5a9e6a;font-weight:600">Audio loaded</div>';
+    if (audioData.detectedBpm) {
+      h += '<div class="muted" style="font-size:12px">Detected BPM: ' + Math.round(audioData.detectedBpm) + '</div>';
+    }
+    h += '<button class="btn" onclick="act(\'removeSongAudio\',\'' + songId + '\')">Remove Audio</button>';
+  } else if (S.songAudioImporting) {
+    h += '<div>Separating stems... ' + (S.songAudioProgress || 0) + '%</div>';
+    h += '<div style="background:var(--bg-input);border-radius:4px;height:6px;overflow:hidden;margin-top:4px"><div style="width:' + (S.songAudioProgress || 0) + '%;height:100%;background:var(--accent);transition:width .3s"></div></div>';
+  } else {
+    h += '<div class="muted" style="font-size:12px;margin-bottom:6px">Import an MP3 to play along with the actual song.</div>';
+    h += '<button class="btn btn-primary" onclick="act(\'importSongAudio\',\'' + songId + '\')">Import Song Audio</button>';
+  }
+  h += '</div>';
+
   h += '<div class="card mb16">';
   h += '<button class="btn btn-primary" onclick="act(\'performStart\')">Start Performance</button> ';
   h += '<button class="btn" onclick="act(\'back\')">Back</button>';

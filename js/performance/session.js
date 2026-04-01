@@ -26,6 +26,17 @@
     PerformanceInput.start();
     PerformanceTransport.start(0, opts.speed || S.performSpeed || 1);
 
+    // Load stems if song has imported audio
+    var songId = typeof normalizeSongId === "function" ? normalizeSongId(S.performSongData) : "unknown";
+    var audioData = S.songAudioData[songId];
+    if (audioData && audioData.stemUrls && Object.keys(audioData.stemUrls).length > 0) {
+      loadStemUrls(audioData.stemUrls);
+      setStemMuted("piano", true); // mute piano for practice
+      playStems();
+      var firstStem = _stemAudios[Object.keys(_stemAudios)[0]];
+      if (firstStem) PerformanceTransport.setAudioSource(firstStem);
+    }
+
     S.screen = SCR.PERFORM;
     render();
     updatePerformanceFrame();
@@ -33,9 +44,10 @@
 
   function stopPerformance(){
     if(typeof _destroyPianoHighway==='function') _destroyPianoHighway();
+    if (typeof cleanupStems === "function") cleanupStems();
+    PerformanceTransport.stop();
     if(_performAnim) cancelAnimationFrame(_performAnim);
     _performAnim = null;
-    PerformanceTransport.pause();
     PerformanceInput.stop();
     S.performPlaying = false;
     S.performPaused = false;
@@ -43,6 +55,7 @@
 
   function pausePerformance(){
     PerformanceTransport.pause();
+    if (typeof pauseStems === "function") pauseStems();
     S.performPaused = true;
     S.performPlaying = false;
     if(_performAnim) cancelAnimationFrame(_performAnim);
@@ -52,6 +65,7 @@
 
   function resumePerformance(){
     PerformanceTransport.resume();
+    if (typeof playStems === "function") playStems();
     S.performPaused = false;
     S.performPlaying = true;
     updatePerformanceFrame();
@@ -149,6 +163,36 @@
     S.screen = SCR.PERFORM_DONE;
     render();
   }
+
+  function applyPianoStemPreset(preset) {
+    if (typeof setStemMuted !== "function") return;
+    switch (preset) {
+      case "full_mix":
+        setStemMuted("piano", false); setStemMuted("vocals", false);
+        setStemMuted("drums", false); setStemMuted("bass", false);
+        setStemMuted("guitar", false); setStemMuted("other", false);
+        break;
+      case "no_piano":
+        setStemMuted("piano", true); setStemMuted("vocals", false);
+        setStemMuted("drums", false); setStemMuted("bass", false);
+        setStemMuted("guitar", false); setStemMuted("other", false);
+        break;
+      case "quiet_piano":
+        setStemMuted("piano", false); setStemMuted("vocals", false);
+        setStemMuted("drums", false); setStemMuted("bass", false);
+        setStemMuted("guitar", false); setStemMuted("other", false);
+        if (typeof setStemVolume === "function") setStemVolume(0.8);
+        if (_stemAudios && _stemAudios.piano) _stemAudios.piano.volume = 0.2;
+        break;
+      case "solo_piano":
+        setStemMuted("piano", false); setStemMuted("vocals", true);
+        setStemMuted("drums", true); setStemMuted("bass", true);
+        setStemMuted("guitar", true); setStemMuted("other", true);
+        break;
+    }
+  }
+
+  window.applyPianoStemPreset = applyPianoStemPreset;
 
   window.startPerformance = startPerformance;
   window.stopPerformance = stopPerformance;

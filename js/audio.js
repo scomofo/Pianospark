@@ -538,8 +538,10 @@ function stopMetronome() {
 
 // ── Chord detection via microphone ──
 var micStream = null;
+var _micSourceNode = null;
 var analyserNode = null;
 var detectionAnimFrame = null;
+var _lastYinRenderTime = 0;
 var detectionHistory = [];
 var _detectionFrameCount = 0;
 
@@ -578,11 +580,11 @@ function startDetection() {
   var ctx = ensureAudio();
   navigator.mediaDevices.getUserMedia({ audio: true }).then(function(stream) {
     micStream = stream;
-    var src = ctx.createMediaStreamSource(stream);
+    _micSourceNode = ctx.createMediaStreamSource(stream);
     analyserNode = ctx.createAnalyser();
     analyserNode.fftSize = 8192;
     analyserNode.smoothingTimeConstant = 0.4;
-    src.connect(analyserNode);
+    _micSourceNode.connect(analyserNode);
     S.detecting = true;
     detectionHistory = [];
     _detectionFrameCount = 0;
@@ -598,7 +600,7 @@ function startDetection() {
 
 function stopDetection() {
   S.detecting = false;
-  // Clean up YIN worklet node if it was running
+  if (_micSourceNode) { _micSourceNode.disconnect(); _micSourceNode = null; }
   if (_yinNode) { _yinNode.disconnect(); _yinNode = null; }
   if (micStream) { micStream.getTracks().forEach(function(t) { t.stop(); }); micStream = null; }
   if (detectionAnimFrame) { cancelAnimationFrame(detectionAnimFrame); detectionAnimFrame = null; }
@@ -828,9 +830,9 @@ function startYinDetection() {
     }
     navigator.mediaDevices.getUserMedia({ audio: true }).then(function(stream) {
       micStream = stream;
-      var src = ctx.createMediaStreamSource(stream);
+      _micSourceNode = ctx.createMediaStreamSource(stream);
       _yinNode = new AudioWorkletNode(ctx, "yin-processor");
-      src.connect(_yinNode);
+      _micSourceNode.connect(_yinNode);
 
       // Accumulate pitches over a short window and vote on pitch classes
       var recentFreqs = [];
@@ -859,7 +861,11 @@ function startYinDetection() {
           var co = findChord(activeChordShort);
           if (co) recordDetectionScore(getChordMatch(co));
         }
-        render();
+        var now = performance.now();
+        if (now - _lastYinRenderTime > 50) {
+          _lastYinRenderTime = now;
+          render();
+        }
       };
 
       S.detecting = true;
@@ -1143,6 +1149,13 @@ function setStemMuted(name, muted) {
 function setStemVolume(vol) {
   var keys = Object.keys(_stemAudios);
   for (var i = 0; i < keys.length; i++) _stemAudios[keys[i]].volume = vol;
+}
+
+function setStemPlaybackRate(rate) {
+  var keys = Object.keys(_stemAudios);
+  for (var i = 0; i < keys.length; i++) {
+    _stemAudios[keys[i]].playbackRate = rate;
+  }
 }
 
 function cleanupStems() {

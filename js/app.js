@@ -1,6 +1,15 @@
 /* ───────── PianoSpark – app.js ───────── */
 /* Major refactor: guided sessions, reward engine, adaptive difficulty */
 
+// ── Utility ──
+function shuffleArray(arr) {
+  for (var i = arr.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+  }
+  return arr;
+}
+
 // ── Timer ticks ──
 function tickSession() {
   if (S.paused || !S.active) return;
@@ -206,10 +215,7 @@ function pickReviewChords() {
   if (chords.length < 2) {
     var available = chordsUpToLevel(S.level).map(function(c) { return c.short; })
       .filter(function(c) { return chords.indexOf(c) < 0; });
-    for (var si = available.length - 1; si > 0; si--) {
-      var sj = Math.floor(Math.random() * (si + 1));
-      var st = available[si]; available[si] = available[sj]; available[sj] = st;
-    }
+    shuffleArray(available);
     while (chords.length < 2 && available.length > 0) chords.push(available.shift());
   }
 
@@ -223,16 +229,12 @@ function genQuiz() {
   if (pool.length < 4) pool = chordsUpToLevel(3);
   var answer = pool[Math.floor(Math.random() * pool.length)].short;
   // Shuffle pool then pick up to 3 distractors — avoids infinite loop if pool is small
-  var shuffled = pool.slice();
-  for (var si = shuffled.length - 1; si > 0; si--) { var sj = Math.floor(Math.random() * (si + 1)); var st = shuffled[si]; shuffled[si] = shuffled[sj]; shuffled[sj] = st; }
+  var shuffled = shuffleArray(pool.slice());
   var options = [answer];
   for (var i = 0; i < shuffled.length && options.length < 4; i++) {
     if (shuffled[i].short !== answer) options.push(shuffled[i].short);
   }
-  for (var k = options.length - 1; k > 0; k--) {
-    var j = Math.floor(Math.random() * (k + 1));
-    var tmp = options[k]; options[k] = options[j]; options[j] = tmp;
-  }
+  shuffleArray(options);
   return { answer: answer, options: options };
 }
 
@@ -1026,6 +1028,58 @@ function act(action, param) {
     case "performArrangement":
       S.performArrangementType = param || "block_chords";
       saveState();
+      break;
+    case "importSongAudio":
+      if(!window.electron||!window.electron.stems){alert("Requires desktop app.");break;}
+      var importSongId=param;
+      window.electron.stems.openFile().then(function(result){
+        if(!result)return;
+        S.songAudioImporting=true;
+        S.songAudioProgress=0;
+        render();
+
+        var unsubProgress=window.electron.stems.onProgress(function(data){
+          if(data&&data.progress!=null){S.songAudioProgress=Math.round(data.progress);render();}
+        });
+
+        window.electron.stems.checkCache(result.filePath).then(function(cached){
+          if(cached) return cached;
+          return window.electron.stems.separate(result.filePath);
+        }).then(function(stemPaths){
+          unsubProgress();
+          if(!stemPaths){S.songAudioImporting=false;render();return;}
+          var stemNames=Object.keys(stemPaths);
+          var urlMap={};
+          function loadNext(idx){
+            if(idx>=stemNames.length){
+              S.songAudioData[importSongId]={
+                mp3Path:result.filePath,
+                detectedBpm:null,
+                stemPaths:stemPaths,
+                stemUrls:urlMap,
+                importedAt:new Date().toISOString()
+              };
+              S.songAudioImporting=false;
+              saveState();render();
+              return;
+            }
+            window.electron.stems.getFileUrl(stemPaths[stemNames[idx]]).then(function(url){
+              urlMap[stemNames[idx]]=url;
+              loadNext(idx+1);
+            });
+          }
+          loadNext(0);
+        }).catch(function(err){
+          unsubProgress();
+          S.songAudioImporting=false;
+          alert("Stem separation failed: "+(err.message||err));
+          render();
+        });
+      });
+      break;
+    case "removeSongAudio":
+      delete S.songAudioData[param];
+      saveState();render();
       break;
     case "performStart": {
       var chart = buildPerformanceChartFromSong(S.performSongData, S.performArrangementType);
