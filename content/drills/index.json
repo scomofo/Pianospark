@@ -1,0 +1,30 @@
+[
+  {
+    "id": "drill_c_practice",
+    "type": "chord",
+    "title": "C Major Practice",
+    "target": ["C"],
+    "bpm": 60
+  },
+  {
+    "id": "drill_cg_switch",
+    "type": "transition",
+    "title": "C to G Switch Drill",
+    "target": ["C", "G"],
+    "bpm": 70
+  },
+  {
+    "id": "drill_c_am_switch",
+    "type": "transition",
+    "title": "C to Am Switch Drill",
+    "target": ["C", "Am"],
+    "bpm": 70
+  },
+  {
+    "id": "drill_lh_root_01",
+    "type": "left_hand",
+    "title": "Left Hand Root Notes",
+    "target": ["C", "G", "Am", "F"],
+    "bpm": 60
+  }
+]

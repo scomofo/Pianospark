@@ -1,0 +1,18 @@
+[
+  {
+    "id": "song_twinkle_easy",
+    "title": "Twinkle Twinkle Little Star",
+    "artist": "Traditional",
+    "level": 1,
+    "tags": ["beginner", "melody"],
+    "arrangements": ["melody_easy"]
+  },
+  {
+    "id": "song_ode_to_joy_easy",
+    "title": "Ode to Joy",
+    "artist": "Beethoven",
+    "level": 2,
+    "tags": ["beginner", "classical", "melody"],
+    "arrangements": ["melody_easy", "two_hand_easy"]
+  }
+]

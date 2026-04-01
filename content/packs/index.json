@@ -1,0 +1,26 @@
+[
+  {
+    "id": "pack_beginner_piano_01",
+    "title": "Beginner Piano Pack",
+    "type": "lesson_pack",
+    "version": "1.0.0",
+    "level": 1,
+    "includes": {
+      "lessons": ["lesson_c_major", "lesson_g_major", "lesson_am"],
+      "songs": ["song_twinkle_easy"],
+      "drills": ["drill_c_practice", "drill_cg_switch"],
+      "templates": ["template_block_chord_4beat"]
+    }
+  },
+  {
+    "id": "pack_lh_patterns_01",
+    "title": "Left Hand Patterns Pack",
+    "type": "technique_pack",
+    "version": "1.0.0",
+    "level": 2,
+    "includes": {
+      "drills": ["drill_lh_root_01"],
+      "templates": ["template_lh_alberti_01"]
+    }
+  }
+]

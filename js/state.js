@@ -40,7 +40,32 @@ var PERSIST = [
   // Analytics visualization
   "analytics",
   // Audio latency calibration
-  "audioLatencyMs","inputLatencyMs","calibrationOffsets"
+  "audioLatencyMs","inputLatencyMs","calibrationOffsets",
+  // MIDI device mapping + profiles
+  "activeMidiDeviceId","midiProfiles","activeMidiProfileId","midiRoutingMode",
+  // MIDI import
+  "importedMidiAssignments",
+  // Cloud sync + accounts
+  "cloudAuth","cloudProfile","cloudSync",
+  // Desktop info + feedback
+  "desktopInfo","feedbackDraft",
+  // Curriculum
+  "completedCurriculumLessons",
+  // Editor library (for cloud sync)
+  "editorLibrary",
+  // Recommendation engine
+  "recommendationHistory","recommendationSettings",
+  // Career mode
+  "careerProgress","activeCareerId","activeCareerTier","activeCareerStage",
+  // Insights / analytics dashboard
+  "insightSnapshots","personalInsights",
+  // Challenge system expansion
+  "activeChallenges","seasonalEvents","activeEventId",
+  "packCompletion","challengeRewards",
+  // Onboarding flow
+  "onboardingFlow","firstRun",
+  // Settings / platform maturity
+  "settings","profile","tutorialProgress","releaseInfo"
 ];
 
 // Consolidated timer object (like ChordSpark's T)
@@ -335,6 +360,152 @@ var S = {
   },
   unlocks: { lessons:{}, songs:{}, exercises:{} },
   progressionTree: null,
+
+  // MIDI device mapping + profiles (Phase 1)
+  midiDevices: [],
+  activeMidiDeviceId: null,
+  midiProfiles: {},
+  activeMidiProfileId: null,
+  midiRoutingMode: "default", // default | guitar | piano | custom
+
+  // MIDI import (Phase 2)
+  importedMidi: null,
+  importedMidiTracks: [],
+  importedMidiAssignments: {},
+  importedMidiSeedPreview: null,
+
+  // Cloud sync + accounts (Phase 5)
+  cloudAuth: {
+    userId: null,
+    email: null,
+    token: null,
+    loggedIn: false
+  },
+  cloudProfile: {
+    displayName: "",
+    createdAt: null,
+    updatedAt: null
+  },
+  cloudSync: {
+    lastSyncAt: null,
+    lastSyncStatus: "idle", // idle | syncing | ok | error
+    dirtyKeys: [],
+    syncEnabled: true
+  },
+
+  // Desktop info (Phase 3/4/6)
+  desktopInfo: {
+    channel: "dev",       // dev | beta | stable
+    version: "dev",
+    buildNumber: 0,
+    lastUpdateCheckAt: null,
+    updateStatus: "idle", // idle | checking | available | none | error
+    lastBackupAt: null
+  },
+  feedbackDraft: {
+    text: "",
+    email: ""
+  },
+  releaseInfo: null,
+  releaseNotes: [],
+
+  // Curriculum (Phase 7)
+  completedCurriculumLessons: [],
+  editorLibrary: [],
+
+  // Recommendation engine (Phase 8)
+  recommendations: [],
+  lastRecommendationRun: null,
+  recommendationHistory: [],
+  recommendationSettings: {
+    preferWeakSpots: true,
+    preferCurriculum: true,
+    preferVariety: true,
+    maxSuggestions: 5
+  },
+
+  // Career mode (Phase 9)
+  careerProgress: {
+    unlockedTiers: {},
+    unlockedStages: {},
+    unlockedSongs: {},
+    songRatings: {},
+    stageCompletion: {},
+    tierCompletion: {}
+  },
+  activeCareerId: "career_main",
+  activeCareerTier: null,
+  activeCareerStage: null,
+
+  // Insights / analytics dashboard (Phase 10)
+  insightSnapshots: [],
+  personalInsights: {
+    weakestSkills: [],
+    strongestSkills: [],
+    masteryTrend: {},
+    practiceTrend: {},
+    recommendationQuality: {},
+    careerTrend: {},
+    packProgress: {}
+  },
+  lastInsightRun: null,
+
+  // Challenge system expansion (Phase 11)
+  activeChallenges: [],
+  seasonalEvents: [],
+  activeEventId: null,
+  packCompletion: {
+    lessons: {},
+    songs: {},
+    drills: {},
+    packs: {}
+  },
+  challengeRewards: {
+    claimed: {},
+    eventClaimed: {},
+    packClaimed: {}
+  },
+
+  // Onboarding flow (Phase 14)
+  onboardingFlow: {
+    completed: false,
+    startedAt: null,
+    completedAt: null,
+    currentStep: "welcome",
+    instrument: "piano",
+    skillLevel: null,
+    goals: [],
+    midiSetupDone: false,
+    calibrationDone: false,
+    starterContentUnlocked: false
+  },
+  firstRun: true,
+
+  // Settings / platform maturity (Phase 13)
+  settings: {
+    audioLatencyMs: 0,
+    metronomeVolume: 0.6,
+    noteSpeed: 1.0,
+    difficultyAutoAdjust: true,
+    theme: "dark",
+    showFingerHints: true,
+    practiceReminder: true,
+    cloudSyncEnabled: false,
+    uiVolume: 0.5
+  },
+  profile: {
+    displayName: "",
+    avatar: "default",
+    instrumentPrimary: "piano",
+    joinDate: 0,
+    totalPracticeMinutes: 0,
+    favoriteSongs: [],
+    achievements: []
+  },
+  tutorialProgress: {
+    completed: {},
+    skipped: {}
+  },
 };
 
 // Debounced save — prevents localStorage thrashing on rapid actions

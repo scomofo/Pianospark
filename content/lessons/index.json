@@ -1,0 +1,32 @@
+[
+  {
+    "id": "lesson_c_major",
+    "title": "C Major Chord",
+    "level": 1,
+    "objectives": ["Learn C chord", "Play clean notes", "Hold chord shape"],
+    "exercises": ["ex_c_clean"],
+    "drills": ["drill_c_practice"],
+    "songs": [],
+    "unlocks": ["lesson_g_major"]
+  },
+  {
+    "id": "lesson_g_major",
+    "title": "G Major Chord",
+    "level": 1,
+    "objectives": ["Learn G chord", "Switch from C to G"],
+    "exercises": ["ex_g_clean"],
+    "drills": ["drill_cg_switch"],
+    "songs": [],
+    "unlocks": ["lesson_am"]
+  },
+  {
+    "id": "lesson_am",
+    "title": "A Minor Chord",
+    "level": 1,
+    "objectives": ["Learn Am chord", "Three-chord switching"],
+    "exercises": ["ex_am_clean"],
+    "drills": ["drill_c_am_switch"],
+    "songs": [],
+    "unlocks": ["lesson_f_major"]
+  }
+]

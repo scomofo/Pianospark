@@ -1313,6 +1313,97 @@ function act(action, param) {
     case "stop_chord_change":
       finishChordChange();
       break;
+
+    // ── MIDI Device/Profile actions ──
+    case "setMidiDevice":
+      S.activeMidiDeviceId = param;
+      saveState();
+      break;
+
+    case "setMidiProfile":
+      if(typeof setActiveMidiProfile === "function") setActiveMidiProfile(param);
+      break;
+
+    case "createDefaultPianoProfile":
+      if(typeof createDefaultPianoProfile === "function") createDefaultPianoProfile();
+      break;
+
+    case "createDefaultGuitarProfile":
+      if(typeof createDefaultGuitarProfile === "function") createDefaultGuitarProfile();
+      break;
+
+    case "openMidiSettings":
+      S.screen = SCR.MIDI_SETTINGS;
+      break;
+
+    case "openMidiImport":
+      S.screen = SCR.MIDI_IMPORT;
+      break;
+
+    // ── MIDI Import actions ──
+    case "importMidiFile":
+      if(typeof handleMidiImport === "function") handleMidiImport(param);
+      return;
+
+    case "assignMidiTrack": {
+      var atParts = String(param).split("|");
+      if(typeof setMidiTrackAssignment === "function") setMidiTrackAssignment(atParts[0], atParts[1]);
+      break;
+    }
+
+    case "buildMidiSeedChart": {
+      var seedChart = typeof buildSeedChartFromImportedMidi === "function"
+        ? buildSeedChartFromImportedMidi(S.importedMidi, S.importedMidiAssignments, param)
+        : null;
+      S.importedMidiSeedPreview = seedChart;
+      if(seedChart && typeof openEditor === "function"){
+        openEditor("chart", seedChart);
+      }
+      break;
+    }
+
+    // ── Cloud Sync actions ──
+    case "cloudSync":
+      if(typeof syncSparkNow === "function") syncSparkNow();
+      return;
+
+    case "cloudPull":
+      if(typeof pullSparkCloud === "function") pullSparkCloud();
+      return;
+
+    case "cloudLogout":
+      if(typeof logoutSpark === "function") logoutSpark();
+      break;
+
+    case "cloudLoginPrompt": {
+      var clEmail = prompt("Email:");
+      var clPassword = prompt("Password:");
+      if(clEmail && clPassword && typeof loginSpark === "function"){
+        loginSpark(clEmail, clPassword).then(function(){ render(); });
+      }
+      return;
+    }
+
+    case "openCloudSettings":
+      S.screen = SCR.CLOUD_SETTINGS;
+      break;
+
+    case "openCurriculum":
+      S.screen = SCR.CURRICULUM;
+      break;
+
+    // ── Desktop / Release actions ──
+    case "checkUpdates":
+      if(typeof checkForDesktopUpdates === "function") checkForDesktopUpdates();
+      return;
+
+    case "exportBackup":
+      if(typeof exportFullBackupDesktopAware === "function") exportFullBackupDesktopAware();
+      return;
+
+    case "exportFeedback":
+      if(typeof exportFeedbackDesktopAware === "function") exportFeedbackDesktopAware();
+      return;
   }
 
   render();
@@ -1348,6 +1439,30 @@ function render() {
   // Practice plan screen
   if (S.screen === SCR.PLAN) {
     root.innerHTML = headerHTML() + planPage();
+    return;
+  }
+
+  // MIDI settings screen
+  if (S.screen === SCR.MIDI_SETTINGS && typeof midiSettingsPage === "function") {
+    root.innerHTML = headerHTML() + '<button onclick="act(\'go_home\')" style="margin:8px">Back</button>' + midiSettingsPage();
+    return;
+  }
+
+  // MIDI import screen
+  if (S.screen === SCR.MIDI_IMPORT && typeof midiImportPage === "function") {
+    root.innerHTML = headerHTML() + '<button onclick="act(\'go_home\')" style="margin:8px">Back</button>' + midiImportPage();
+    return;
+  }
+
+  // Cloud settings screen
+  if (S.screen === SCR.CLOUD_SETTINGS && typeof cloudSettingsPage === "function") {
+    root.innerHTML = headerHTML() + '<button onclick="act(\'go_home\')" style="margin:8px">Back</button>' + cloudSettingsPage();
+    return;
+  }
+
+  // Curriculum screen
+  if (S.screen === SCR.CURRICULUM && typeof curriculumPage === "function") {
+    root.innerHTML = headerHTML() + '<button onclick="act(\'go_home\')" style="margin:8px">Back</button>' + curriculumPage();
     return;
   }
 

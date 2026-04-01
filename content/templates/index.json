@@ -1,0 +1,14 @@
+[
+  {
+    "id": "template_block_chord_4beat",
+    "type": "block_chord",
+    "title": "4-Beat Block Chord",
+    "pattern": ["hold", "hold", "hold", "hold"]
+  },
+  {
+    "id": "template_lh_alberti_01",
+    "type": "left_hand",
+    "title": "Alberti Bass Pattern",
+    "pattern": ["root", "fifth", "third", "fifth"]
+  }
+]
