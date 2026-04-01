@@ -1621,6 +1621,26 @@ document.addEventListener("keydown", function(e) {
   switch (e.key) {
     case " ":
       e.preventDefault();
+      // In perform mode: spacebar = simulate note hit for testing
+      if (S.screen === SCR.PERFORM && S.performPlaying && S.performChart && !S.performPaused) {
+        var nowSec = PerformanceTransport.now();
+        var chart = S.performChart;
+        for (var si = 0; si < chart.events.length; si++) {
+          var evt = chart.events[si];
+          if (evt._scored) continue;
+          var delta = Math.abs(nowSec - evt.t) * 1000;
+          if (delta < (S.performWindowMissMs || 220)) {
+            var targetNotes = [];
+            if (evt.target && Array.isArray(evt.target.midi)) targetNotes = evt.target.midi.map(function(m) { return typeof midiToNote === "function" ? midiToNote(m) : "C"; });
+            else if (evt.target && evt.target.notes) targetNotes = evt.target.notes;
+            else if (evt.notes) targetNotes = evt.notes;
+            if (targetNotes.length) PerformanceInput.latestPitchClasses = targetNotes.slice();
+            else PerformanceInput.latestPitchClasses = ["C", "E", "G"];
+            break;
+          }
+        }
+        break;
+      }
       if (S.active || S.screen === SCR.SESSION) act("pause");
       break;
     case "ArrowLeft":
