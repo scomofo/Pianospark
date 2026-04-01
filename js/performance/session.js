@@ -96,6 +96,10 @@
       evt._hit = true;
       evt._result = result.grade;
       evt._score = result.score;
+      if (typeof _ensurePianoHighway !== "undefined" && evt._screenX) {
+        var _phw = _ensurePianoHighway(document.getElementById('spark-highway-canvas'));
+        if (_phw) _phw.notifyHit(evt._screenX, evt._screenY, evt._screenColor || [100, 200, 255]);
+      }
 
       S.performCombo++;
       S.performMaxCombo = Math.max(S.performMaxCombo, S.performCombo);
