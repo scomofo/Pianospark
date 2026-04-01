@@ -756,3 +756,8 @@ body.focus-mode .app-header { padding: 8px 4px; }
 @media (min-width: 600px) { body { max-width: 600px; margin: 0 auto; } }
 @media (min-width: 900px) { body { max-width: 800px; } .song-list { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; } }
 @media (min-width: 1200px) { body { max-width: 1000px; } .song-list { grid-template-columns: 1fr 1fr 1fr; } }
+
+/* Home dashboard grid */
+.home-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:16px; padding:8px 0; }
+.home-grid-item { min-height:140px; }
+.mb16 { margin-bottom:16px; }

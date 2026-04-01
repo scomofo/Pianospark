@@ -1404,6 +1404,70 @@ function act(action, param) {
     case "exportFeedback":
       if(typeof exportFeedbackDesktopAware === "function") exportFeedbackDesktopAware();
       return;
+
+    // ── Recommendation engine ──
+    case "openRecommendations":
+      S.screen = SCR.RECOMMENDATIONS;
+      break;
+    case "launchRecommendation":
+      if(typeof launchRecommendationById === "function") launchRecommendationById(param);
+      return;
+
+    // ── Career mode ──
+    case "openCareer":
+      S.screen = SCR.CAREER;
+      break;
+    case "openCareerSong":
+      if(typeof getCareerItem === "function"){
+        var cSong = getCareerItem("songs", param);
+        if(cSong) S.performSongId = param;
+      }
+      S.screen = SCR.PERFORM_SONG;
+      break;
+
+    // ── Insights ──
+    case "openInsights":
+      S.screen = SCR.INSIGHTS;
+      break;
+
+    // ── Challenge hub ──
+    case "openChallengeHub":
+      S.screen = SCR.CHALLENGES;
+      break;
+    case "claimChallengeReward":
+      if(typeof claimChallengeReward === "function") claimChallengeReward(param);
+      break;
+    case "initChallenges":
+      if(typeof initializeChallengesForCurrentCycle === "function") initializeChallengesForCurrentCycle();
+      break;
+
+    // ── Home dashboard ──
+    case "openHome":
+    case "openHomeDash":
+      S.screen = SCR.HOME_DASH;
+      break;
+    case "refreshHome":
+      if(typeof generateRecommendations === "function") generateRecommendations();
+      if(typeof generatePersonalInsights === "function") generatePersonalInsights();
+      break;
+
+    // ── Practice plan ──
+    case "openPracticePlan":
+      S.screen = SCR.PLAN;
+      break;
+
+    // ── Onboarding flow ──
+    case "openOnboarding":
+      if(typeof startOnboarding === "function") startOnboarding();
+      return;
+    case "resumeOnboarding":
+      if(typeof continueOnboarding === "function") continueOnboarding();
+      return;
+
+    // ── Settings ──
+    case "openSettings":
+      S.screen = SCR.SETTINGS;
+      break;
   }
 
   render();
@@ -1477,6 +1541,48 @@ function render() {
   }
   if (S.screen === SCR.PERFORM_DONE) {
     root.innerHTML = headerHTML() + performDonePage();
+    return;
+  }
+
+  // Onboarding flow screen (new)
+  if (S.screen === SCR.ONBOARDING_FLOW && typeof onboardingFlowPage === "function") {
+    root.innerHTML = onboardingFlowPage();
+    return;
+  }
+
+  // Home dashboard screen
+  if (S.screen === SCR.HOME_DASH && typeof homeDashboardPage === "function") {
+    root.innerHTML = headerHTML() + homeDashboardPage();
+    return;
+  }
+
+  // Recommendations screen
+  if (S.screen === SCR.RECOMMENDATIONS && typeof recommendationsPage === "function") {
+    root.innerHTML = headerHTML() + '<button onclick="act(\'go_home\')" style="margin:8px">Back</button>' + recommendationsPage();
+    return;
+  }
+
+  // Career mode screen
+  if (S.screen === SCR.CAREER && typeof careerPage === "function") {
+    root.innerHTML = headerHTML() + '<button onclick="act(\'go_home\')" style="margin:8px">Back</button>' + careerPage();
+    return;
+  }
+
+  // Insights dashboard screen
+  if (S.screen === SCR.INSIGHTS && typeof insightsDashboardPage === "function") {
+    root.innerHTML = headerHTML() + '<button onclick="act(\'go_home\')" style="margin:8px">Back</button>' + insightsDashboardPage();
+    return;
+  }
+
+  // Challenge hub screen
+  if (S.screen === SCR.CHALLENGES && typeof challengeHubPage === "function") {
+    root.innerHTML = headerHTML() + '<button onclick="act(\'go_home\')" style="margin:8px">Back</button>' + challengeHubPage();
+    return;
+  }
+
+  // Settings screen
+  if (S.screen === SCR.SETTINGS && typeof settingsPage === "function") {
+    root.innerHTML = headerHTML() + '<button onclick="act(\'go_home\')" style="margin:8px">Back</button>' + settingsPage();
     return;
   }
 
