@@ -32,6 +32,7 @@
   }
 
   function stopPerformance(){
+    if(typeof _destroyPianoHighway==='function') _destroyPianoHighway();
     if(_performAnim) cancelAnimationFrame(_performAnim);
     _performAnim = null;
     PerformanceTransport.pause();
@@ -70,7 +71,8 @@
       return;
     }
 
-    render();
+    if(typeof updatePerformanceDOM === 'function') updatePerformanceDOM();
+    else render();
     _performAnim = requestAnimationFrame(updatePerformanceFrame);
   }
 
