@@ -30,7 +30,11 @@ var PERSIST = [
   "weakSpots","practiceHistory","adaptiveState",
   "weeklyPracticePlan","practiceStreak","lastPracticeDate",
   "totalPracticeMinutes","todayPracticeMinutes",
-  "mastery","unlocks"
+  "mastery","unlocks",
+  // Meta progression
+  "playerXP","playerLevel","playerAchievements","playerStats","xpLog",
+  // Content library
+  "contentLibrary"
 ];
 
 // Consolidated timer object (like ChordSpark's T)
@@ -256,6 +260,25 @@ var S = {
   totalPracticeMinutes: 0,
   todayPracticeMinutes: 0,
 
+  // Meta progression
+  playerXP: 0,
+  playerLevel: 1,
+  playerAchievements: {},
+  playerStats: {
+    songsCompleted:0,
+    lessonsCompleted:0,
+    exercisesCompleted:0,
+    totalPracticeMinutes:0,
+    streakBest:0
+  },
+  xpLog: [],
+  contentLibrary: {
+    rhythmPatterns:[],
+    lhPatterns:[],
+    chordProgressions:[],
+    exercises:[]
+  },
+
   // Mastery & progression
   mastery: {
     chords:{}, transitions:{}, rhythm:{},
@@ -309,14 +332,16 @@ function loadState() {
       midiEnabled:"boolean",
       reverbAmount:"number", a4Tuning:"number",
       practiceStreak:"number", totalPracticeMinutes:"number",
-      todayPracticeMinutes:"number"
+      todayPracticeMinutes:"number",
+      playerXP:"number", playerLevel:"number"
     };
     var arrayFields = ["earned","history","customSets","songsDone",
                        "completedSessions","stylePrefs","interleavedChords",
                        "lastReviewChords","surpriseQueue","fingerBadges",
-                       "practiceHistory"];
+                       "practiceHistory","xpLog"];
     var objectFields = ["chordProg","transitionStats","personalBests","fingerStats",
-                        "weakSpots","adaptiveState","mastery","unlocks"];
+                        "weakSpots","adaptiveState","mastery","unlocks",
+                        "playerAchievements","playerStats","contentLibrary"];
     var stringFields = ["practiceIntention","tone","lastPractice","metronomeSound",
                         "pitchDetectionMode","lastPracticeDate"];
 
@@ -366,6 +391,15 @@ function loadState() {
   }
   if (typeof S.unlocks !== "object" || S.unlocks === null) {
     S.unlocks = { lessons:{}, songs:{}, exercises:{} };
+  }
+  // Meta progression defaults
+  if (typeof S.playerAchievements !== "object" || S.playerAchievements === null) S.playerAchievements = {};
+  if (typeof S.playerStats !== "object" || S.playerStats === null) {
+    S.playerStats = { songsCompleted:0, lessonsCompleted:0, exercisesCompleted:0, totalPracticeMinutes:0, streakBest:0 };
+  }
+  if (!Array.isArray(S.xpLog)) S.xpLog = [];
+  if (typeof S.contentLibrary !== "object" || S.contentLibrary === null) {
+    S.contentLibrary = { rhythmPatterns:[], lhPatterns:[], chordProgressions:[], exercises:[] };
   }
 
   checkStreak();
@@ -444,6 +478,11 @@ function resetProgress() {
   S.jackpotsHit = 0; S.surpriseQueue = [];
   S.fingerStats = {}; S.fingerExercisesDone = 0;
   S.fingerDaysLogged = 0; S.fingerBadges = [];
+  S.playerXP = 0; S.playerLevel = 1;
+  S.playerAchievements = {};
+  S.playerStats = { songsCompleted:0, lessonsCompleted:0, exercisesCompleted:0, totalPracticeMinutes:0, streakBest:0 };
+  S.xpLog = [];
+  S.contentLibrary = { rhythmPatterns:[], lhPatterns:[], chordProgressions:[], exercises:[] };
 
   var all = allChords();
   for (var j = 0; j < all.length; j++) S.chordProg[all[j].short] = 0;
