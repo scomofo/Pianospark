@@ -163,6 +163,11 @@ var S = {
   stemCurrentTime: 0,
   stemDuration: 0,
   stemToggles: { vocals:true, drums:true, bass:true, guitar:false, piano:false, other:false },
+  // Song Audio Import
+  songAudioData: {},
+  songAudioImporting: false,
+  songAudioProgress: 0,
+  songAudioImportingSongId: null,
 
   // Play styles
   styleIdx: 0,
