@@ -250,14 +250,9 @@ function saveState(immediate) {
   _saveTimer = setTimeout(_doSave, 300);
 }
 function _doSave() {
-  var obj = {};
-  for (var i = 0; i < PERSIST.length; i++) {
-    var k = PERSIST[i];
-    obj[k] = S[k];
-  }
+  var obj = buildPersistedStateSnapshot(S, PERSIST);
   // Cap history
-  if (obj.history && obj.history.length > 500)
-    obj.history = obj.history.slice(-500);
+  obj.history = capArray(obj.history, 500);
   try { localStorage.setItem("pianospark_state", JSON.stringify(obj)); }
   catch(e) { console.error("PianoSpark: saveState failed", e); }
 }
@@ -266,7 +261,8 @@ function loadState() {
   try {
     var raw = localStorage.getItem("pianospark_state");
     if (!raw) return;
-    var obj = JSON.parse(raw);
+    var obj = safeJsonParse(raw, null);
+    if (!obj) return;
 
     // Detect old format (level 1-3, no currentSession) and migrate
     if (obj.level !== undefined && obj.currentSession === undefined) {
@@ -296,6 +292,8 @@ function loadState() {
     var objectFields = ["chordProg","transitionStats","personalBests","fingerStats"];
     var stringFields = ["practiceIntention","tone","lastPractice","metronomeSound","pitchDetectionMode"];
 
+    // Filter obj to only validated fields, then apply
+    var validated = {};
     for (var i = 0; i < PERSIST.length; i++) {
       var k = PERSIST[i];
       if (obj[k] === undefined) continue;
@@ -304,8 +302,9 @@ function loadState() {
       if (arrayFields.indexOf(k) >= 0 && !Array.isArray(val)) continue;
       if (objectFields.indexOf(k) >= 0 && (typeof val !== "object" || val === null || Array.isArray(val))) continue;
       if (stringFields.indexOf(k) >= 0 && typeof val !== "string") continue;
-      S[k] = val;
+      validated[k] = val;
     }
+    applyPersistedStateSnapshot(S, validated, PERSIST);
   } catch(e) { console.error("PianoSpark: loadState failed — data may be corrupted", e); }
 
   // Init chord progress for all chords
@@ -385,13 +384,10 @@ function migrateOldState(obj) {
 }
 
 function resetProgress() {
-  var backup = {};
-  for (var i = 0; i < PERSIST.length; i++) {
-    var k = PERSIST[i];
-    backup[k] = JSON.parse(JSON.stringify(S[k]));
-  }
-  try { localStorage.setItem("pianospark_undo", JSON.stringify(backup)); }
-  catch(e) { console.error("PianoSpark: undo backup failed", e); }
+  var backup = buildPersistedStateSnapshot(S, PERSIST);
+  // Deep-clone to prevent mutation
+  backup = safeJsonParse(JSON.stringify(backup), {});
+  backupPersistedState("pianospark_undo", S, PERSIST);
 
   S.xp = 0; S.streak = 0; S.sessions = 0; S.level = 1;
   S.chordProg = {}; S.earned = []; S.history = [];
@@ -419,21 +415,15 @@ function resetProgress() {
   S._undoBackup = backup;
   S._undoTimer = setTimeout(function() {
     S._undoBackup = null;
-    try { localStorage.removeItem("pianospark_undo"); } catch(e) {}
+    removePersistedBackup("pianospark_undo");
     saveState();
   }, 5000);
 }
 
 function recoverFromCrash() {
   try {
-    var raw = localStorage.getItem("pianospark_crash");
-    if (!raw) return;
-    var backup = JSON.parse(raw);
-    for (var i = 0; i < PERSIST.length; i++) {
-      var k = PERSIST[i];
-      if (backup[k] !== undefined) S[k] = backup[k];
-    }
-    localStorage.removeItem("pianospark_crash");
+    if (!restorePersistedState("pianospark_crash", S, PERSIST)) return;
+    removePersistedBackup("pianospark_crash");
     saveState(true);
   } catch(e) { console.error("PianoSpark: recoverFromCrash failed", e); }
 }
@@ -441,19 +431,15 @@ function recoverFromCrash() {
 function undoReset() {
   if (!S._undoBackup) return false;
   clearTimeout(S._undoTimer);
-  for (var i = 0; i < PERSIST.length; i++) {
-    var k = PERSIST[i];
-    if (S._undoBackup[k] !== undefined) S[k] = S._undoBackup[k];
-  }
+  applyPersistedStateSnapshot(S, S._undoBackup, PERSIST);
   S._undoBackup = null;
-  try { localStorage.removeItem("pianospark_undo"); } catch(e) {}
+  removePersistedBackup("pianospark_undo");
   saveState(true);
   return true;
 }
 
 function exportState() {
-  var obj = {};
-  for (var i = 0; i < PERSIST.length; i++) obj[PERSIST[i]] = S[PERSIST[i]];
+  var obj = buildPersistedStateSnapshot(S, PERSIST);
   var json = JSON.stringify(obj, null, 2);
   var blob = new Blob([json], { type: "application/json" });
   var url = URL.createObjectURL(blob);
@@ -467,11 +453,7 @@ function exportState() {
 }
 
 function autoExportForJeeves() {
-  var obj = {};
-  for (var i = 0; i < PERSIST.length; i++) obj[PERSIST[i]] = S[PERSIST[i]];
-  try {
-    localStorage.setItem("pianospark_jeeves_export", JSON.stringify(obj));
-  } catch(e) { console.error("PianoSpark: Jeeves export failed", e); }
+  backupPersistedState("pianospark_jeeves_export", S, PERSIST);
 }
 
 function checkStreak() {
