@@ -51,7 +51,54 @@
     return "Learning";
   }
 
+  // Performance mastery — weighted EMA tracking per song and phrase
+  function updatePerformanceMastery(result){
+    if(!result || !result.songId) return;
+    if(!S.performanceMastery) S.performanceMastery = { songs:{}, phrases:{}, leftHand:{}, melody:{} };
+
+    // Song-level mastery (EMA: 70% old + 30% new)
+    var songAcc = (result.accuracy || 0) / 100;
+    if(!S.performanceMastery.songs[result.songId]){
+      S.performanceMastery.songs[result.songId] = 0;
+    }
+    S.performanceMastery.songs[result.songId] =
+      (S.performanceMastery.songs[result.songId] * 0.7) + (songAcc * 0.3);
+
+    // Phrase-level mastery
+    if(Array.isArray(result.phrases)){
+      for(var i=0;i<result.phrases.length;i++){
+        var p = result.phrases[i];
+        var pAcc = p.total ? (p.hits / p.total) : 0;
+        var pKey = result.songId + "_p" + p.phraseId;
+        if(!S.performanceMastery.phrases[pKey]){
+          S.performanceMastery.phrases[pKey] = 0;
+        }
+        S.performanceMastery.phrases[pKey] =
+          (S.performanceMastery.phrases[pKey] * 0.7) + (pAcc * 0.3);
+      }
+    }
+
+    // Track arrangement-specific mastery
+    if(result.arrangementType === "left_hand_patterns"){
+      if(!S.performanceMastery.leftHand[result.songId]){
+        S.performanceMastery.leftHand[result.songId] = 0;
+      }
+      S.performanceMastery.leftHand[result.songId] =
+        (S.performanceMastery.leftHand[result.songId] * 0.7) + (songAcc * 0.3);
+    }
+    if(result.arrangementType === "melody"){
+      if(!S.performanceMastery.melody[result.songId]){
+        S.performanceMastery.melody[result.songId] = 0;
+      }
+      S.performanceMastery.melody[result.songId] =
+        (S.performanceMastery.melody[result.songId] * 0.7) + (songAcc * 0.3);
+    }
+
+    saveState();
+  }
+
   window.updatePerformanceProgression = updatePerformanceProgression;
+  window.updatePerformanceMastery = updatePerformanceMastery;
   window.getPerformanceBest = getPerformanceBest;
   window.getPerformanceMasteryLabel = getPerformanceMasteryLabel;
 

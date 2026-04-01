@@ -144,6 +144,7 @@
   function finishPerformance(){
     stopPerformance();
     S.performResults = finalizePerformanceResults(S.performChart, S.performPhraseStats);
+    S.performanceResult = S.performResults;
     S.performAccuracy = S.performResults.accuracy;
     S.performStarRating = S.performResults.stars;
 
@@ -151,14 +152,66 @@
     S.performanceHistory.push({
       songId:S.performResults.songId,
       title:S.performResults.title,
+      arrangementType:S.performResults.arrangementType,
       accuracy:S.performResults.accuracy,
       stars:S.performResults.stars,
       score:S.performResults.score,
+      maxCombo:S.performResults.maxCombo,
       date:Date.now()
     });
     if(S.performanceHistory.length > 50) S.performanceHistory.shift();
 
+    // Record phrase-level stats for retry logic
+    if(typeof recordPhraseResult === "function" && Array.isArray(S.performResults.phrases)){
+      for(var i=0;i<S.performResults.phrases.length;i++){
+        var ph = S.performResults.phrases[i];
+        var phAcc = ph.total ? (ph.hits / ph.total) : 0;
+        recordPhraseResult(ph.phraseId, phAcc);
+      }
+    }
+
+    // Performance progression (existing)
     updatePerformanceProgression(S.performResults);
+
+    // Performance mastery update
+    if(typeof updatePerformanceMastery === "function"){
+      updatePerformanceMastery(S.performResults);
+    }
+
+    // Mastery system hook
+    if(typeof updateMasteryFromPerformance === "function"){
+      updateMasteryFromPerformance(S.performResults);
+    }
+
+    // Unlock evaluation
+    if(typeof evaluateUnlocks === "function"){
+      evaluateUnlocks();
+    }
+
+    // Achievement evaluation
+    if(typeof evaluateAchievements === "function"){
+      evaluateAchievements();
+    }
+
+    // XP award
+    if(typeof awardSongXP === "function"){
+      awardSongXP((S.performResults.accuracy || 0) / 100);
+    }
+
+    // Practice session recording
+    if(typeof recordPracticeSession === "function"){
+      recordPracticeSession({
+        exerciseId: S.performResults.songId,
+        accuracy: (S.performResults.accuracy || 0) / 100,
+        durationMin: S.performResults.durationMin || 5
+      });
+    }
+
+    // Practice plan completion
+    if(typeof completePracticeItem === "function"){
+      completePracticeItem(S.performResults.songId, S.performResults);
+    }
+
     saveState();
     S.screen = SCR.PERFORM_DONE;
     render();

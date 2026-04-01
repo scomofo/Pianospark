@@ -18,7 +18,8 @@ function performSongPage(){
   h += '<div class="card mb16">';
   h += '<div><b>Arrangement</b></div>';
   h += '<button class="btn'+(S.performArrangementType==="block_chords"?" btn-primary":"")+'" onclick="act(\'performArrangement\',\'block_chords\')">Block Chords</button> ';
-  h += '<button class="btn'+(S.performArrangementType==="left_hand_patterns"?" btn-primary":"")+'" onclick="act(\'performArrangement\',\'left_hand_patterns\')">Left Hand</button>';
+  h += '<button class="btn'+(S.performArrangementType==="left_hand_patterns"?" btn-primary":"")+'" onclick="act(\'performArrangement\',\'left_hand_patterns\')">Left Hand</button> ';
+  h += '<button class="btn'+(S.performArrangementType==="melody"?" btn-primary":"")+'" onclick="act(\'performArrangement\',\'melody\')">Melody</button>';
   h += '</div>';
 
   if(S.performArrangementType==="left_hand_patterns"){

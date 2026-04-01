@@ -5,6 +5,9 @@
     if(arrangementType==="left_hand_patterns"){
       return buildLeftHandPatternChartFromSong(song);
     }
+    if(arrangementType==="melody"){
+      return buildMelodyChartFromSong(song);
+    }
     return buildBlockChordChartFromSong(song);
   }
 
@@ -172,11 +175,123 @@
     return (song.title || "song").toLowerCase().replace(/\s+/g,"_");
   }
 
+  // ── Melody / single-note builder ──
+  // Generates a simplified melody line from chord top notes.
+  // If the song has a .melody array, use that directly;
+  // otherwise derive from the chord's highest note (top-note line).
+
+  function buildMelodyChartFromSong(song){
+    if(!song) return null;
+
+    var bpm = song.bpm || 80;
+    var beatDur = 60 / bpm;
+    var barDur = beatDur * 2;
+    var events = [];
+    var phrases = [];
+    var phraseBars = 4;
+
+    // If song has explicit melody data, use it
+    if(Array.isArray(song.melody) && song.melody.length){
+      for(var i=0;i<song.melody.length;i++){
+        var m = song.melody[i];
+        var midi = typeof m.midi === "number" ? m.midi : (typeof m.note === "string" ? noteNameToMidi(m.note) : 60);
+        events.push({
+          id: i+1,
+          t: m.t != null ? m.t : i * (beatDur * (m.beats || 1)),
+          dur: m.dur != null ? m.dur : beatDur * (m.beats || 1),
+          type: "single_note",
+          target: {
+            midi: midi,
+            note: midiToNote(midi) + midiToOctave(midi),
+            pitchClass: midiToNote(midi)
+          },
+          hand: "RH",
+          performance: {
+            laneLabel: midiToNote(midi) + midiToOctave(midi),
+            phraseId: Math.floor(i / (phraseBars * 2))
+          }
+        });
+      }
+    } else {
+      // Derive melody from chord top notes (simplified top-note line)
+      for(var j=0;j<(song.progression||[]).length;j++){
+        var shortName = song.progression[j];
+        var chord = findChord(shortName);
+        if(!chord) continue;
+
+        var rootPos = (chord.rootPosition && chord.rootPosition.midi) ? chord.rootPosition.midi : [];
+        if(!rootPos.length) continue;
+
+        // Use highest note of chord as melody note
+        var topMidi = rootPos[rootPos.length - 1];
+
+        // Two melody notes per bar (on beats 1 and 2)
+        for(var beat=0; beat<2; beat++){
+          var noteMidi = beat === 0 ? topMidi : rootPos[Math.max(0, rootPos.length - 2)];
+          events.push({
+            id: events.length + 1,
+            t: j * barDur + beat * beatDur,
+            dur: beatDur,
+            type: "single_note",
+            target: {
+              midi: noteMidi,
+              note: midiToNote(noteMidi) + midiToOctave(noteMidi),
+              pitchClass: midiToNote(noteMidi)
+            },
+            hand: "RH",
+            performance: {
+              laneLabel: midiToNote(noteMidi) + midiToOctave(noteMidi),
+              phraseId: Math.floor(j / phraseBars)
+            }
+          });
+        }
+      }
+    }
+
+    // Build phrases
+    var totalBars = Array.isArray(song.melody) ? Math.ceil(events.length / (phraseBars * 2)) : (song.progression||[]).length;
+    var totalPhrases = Math.ceil(totalBars / phraseBars);
+    for(var p=0; p<totalPhrases; p++){
+      phrases.push({
+        id: p,
+        name: "Phrase " + (p + 1),
+        startSec: p * phraseBars * barDur,
+        endSec: Math.min((p + 1) * phraseBars * barDur, events.length ? (events[events.length-1].t + (events[events.length-1].dur||0)) : 0)
+      });
+    }
+
+    return {
+      id: "song_" + normalizeSongId(song) + "_melody",
+      songId: normalizeSongId(song),
+      title: song.title || "Song",
+      artist: song.artist || "",
+      bpm: bpm,
+      arrangementType: "melody",
+      phrases: phrases,
+      events: events
+    };
+  }
+
+  // Helper: convert note name like "C4" to MIDI number
+  function noteNameToMidi(name){
+    if(!name || typeof name !== "string") return 60;
+    var match = name.match(/^([A-Ga-g][#b]?)(\d+)$/);
+    if(!match) return 60;
+    var note = match[1].toUpperCase();
+    var octave = parseInt(match[2], 10);
+    var idx = NOTE_NAMES.indexOf(note);
+    if(idx < 0) idx = FLAT_NAMES.indexOf(note);
+    if(idx < 0) return 60;
+    return (octave + 1) * 12 + idx;
+  }
+
   window.buildPerformanceChartFromSong = buildPerformanceChartFromSong;
   window.buildBlockChordChartFromSong = buildBlockChordChartFromSong;
   window.buildLeftHandPatternChartFromSong = buildLeftHandPatternChartFromSong;
+  window.buildMelodyChartFromSong = buildMelodyChartFromSong;
   window.getCurrentLHPattern = getCurrentLHPattern;
   window.resolveLHPatternMidi = resolveLHPatternMidi;
   window.normalizeSongId = normalizeSongId;
+  window.noteNameToMidi = noteNameToMidi;
 
 })();

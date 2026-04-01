@@ -21,7 +21,7 @@ var PERSIST = [
   "midiEnabled",
   // Performance mode
   "performMode","performDifficulty","performArrangementType","performSpeed",
-  "performanceStats","performanceHistory",
+  "performanceStats","performanceHistory","performanceMastery",
   // Practice plan
   "practicePlan","practicePlanDate","practicePlanHistory",
   // Audio
@@ -242,6 +242,17 @@ var S = {
   performanceStats:{},
   performanceHistory:[],
   performanceLastSummary:null,
+  performanceMode:null,
+  performanceResult:null,
+  performancePhraseStats:{},
+  performanceRetryTarget:null,
+  performanceCurrentPhrase:null,
+  performanceMastery:{
+    songs:{},
+    phrases:{},
+    leftHand:{},
+    melody:{}
+  },
 
   // Practice plan
   practicePlan:null,
