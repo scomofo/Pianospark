@@ -1630,12 +1630,24 @@ document.addEventListener("keydown", function(e) {
           if (evt._scored) continue;
           var delta = Math.abs(nowSec - evt.t) * 1000;
           if (delta < (S.performWindowMissMs || 220)) {
-            var targetNotes = [];
-            if (evt.target && Array.isArray(evt.target.midi)) targetNotes = evt.target.midi.map(function(m) { return typeof midiToNote === "function" ? midiToNote(m) : "C"; });
-            else if (evt.target && evt.target.notes) targetNotes = evt.target.notes;
-            else if (evt.notes) targetNotes = evt.notes;
-            if (targetNotes.length) PerformanceInput.latestPitchClasses = targetNotes.slice();
-            else PerformanceInput.latestPitchClasses = ["C", "E", "G"];
+            // Inject the exact target data the scorer expects
+            if (evt.target && Array.isArray(evt.target.midi) && evt.target.midi.length) {
+              // Block chord: scorer checks heldMidiNotes
+              PerformanceInput.heldMidiNotes = {};
+              for (var mi = 0; mi < evt.target.midi.length; mi++) {
+                PerformanceInput.heldMidiNotes[evt.target.midi[mi]] = true;
+              }
+              PerformanceInput.recentMidiNoteOns.push({note: evt.target.midi[0], tSec: nowSec});
+            } else if (evt.target && typeof evt.target.midi === "number") {
+              // LH note: scorer checks single MIDI note
+              PerformanceInput.heldMidiNotes = {};
+              PerformanceInput.heldMidiNotes[evt.target.midi] = true;
+              PerformanceInput.recentMidiNoteOns.push({note: evt.target.midi, tSec: nowSec});
+            }
+            // Also set pitch classes as fallback
+            var pc = evt.target && evt.target.notes ? evt.target.notes : ["C"];
+            PerformanceInput.latestPitchClasses = Array.isArray(pc) ? pc.slice() : [pc];
+            PerformanceInput._updatePitchClasses && PerformanceInput._updatePitchClasses();
             break;
           }
         }
