@@ -33,7 +33,7 @@
       loadStemUrls(audioData.stemUrls);
       setStemMuted("piano", true); // mute piano for practice
       playStems();
-      var firstStem = _stemAudios[Object.keys(_stemAudios)[0]];
+      var firstStem = typeof getFirstStemAudio === "function" ? getFirstStemAudio() : null;
       if (firstStem) PerformanceTransport.setAudioSource(firstStem);
     }
 

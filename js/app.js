@@ -651,6 +651,9 @@ function act(action, param) {
       S.sessionStep = null;
       S.sessionPlan = null;
       break;
+    case "openCalibration":
+      S.screen = SCR.CALIBRATION;
+      break;
 
     // ── Legacy practice ──
     case "start_session":
@@ -1541,6 +1544,12 @@ function render() {
   }
   if (S.screen === SCR.PERFORM_DONE) {
     root.innerHTML = headerHTML() + performDonePage();
+    return;
+  }
+
+  // Calibration screen
+  if (S.screen === SCR.CALIBRATION && typeof calibrationPage === "function") {
+    root.innerHTML = headerHTML() + '<div style="padding:8px"><button class="btn" onclick="act(\'go_home\')">Back</button></div>' + calibrationPage();
     return;
   }
 
