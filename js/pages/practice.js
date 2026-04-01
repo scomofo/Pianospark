@@ -113,5 +113,62 @@ function practiceTab() {
   }
 
   html += '</div>'; // close card
+
+  // Practice Plan + Stats section (brain systems)
+  html += practicePlanSection();
+
   return html;
+}
+
+/* Practice Plan section – shows stats, today's plan, and progression overview */
+function practicePlanSection(){
+  var h = '';
+
+  // Practice stats card
+  if(typeof getPracticeStats === "function"){
+    var stats = getPracticeStats();
+    h += '<div class="card" style="margin-top:12px">';
+    h += '<div><b>Practice Stats</b></div>';
+    h += '<div>Streak: '+stats.streak+' days</div>';
+    h += '<div>Today: '+stats.todayMinutes+' min</div>';
+    h += '<div>Total: '+stats.totalMinutes+' min</div>';
+    h += '<div>Sessions: '+stats.sessions+'</div>';
+    h += '</div>';
+  }
+
+  // Today's brain-generated practice plan
+  if(typeof generateDailyPracticePlan === "function"){
+    if(!S.practicePlan) generateDailyPracticePlan();
+    var plan = S.practicePlan;
+    if(plan && plan.items && plan.items.length){
+      h += '<div class="card" style="margin-top:12px">';
+      h += '<div><b>Today\'s Practice Plan</b></div>';
+      for(var i=0;i<plan.items.length;i++){
+        var item = plan.items[i];
+        var done = item.completed ? ' style="opacity:0.5;text-decoration:line-through"' : '';
+        h += '<div class="row"' + done + '>';
+        h += '<span>' + escHTML(item.type) + (item.target ? ' (' + escHTML(item.target) + ')' : '') + '</span>';
+        if(!item.completed){
+          h += '<button class="btn btn-sm" onclick="act(\'practiceStartItem\', \''+item.id+'\')">Start</button>';
+        }else{
+          h += '<span class="text-muted">Done</span>';
+        }
+        h += '</div>';
+      }
+      h += '</div>';
+    }
+  }
+
+  // Progression mastery summary
+  if(typeof getAverageMastery === "function"){
+    h += '<div class="card" style="margin-top:12px">';
+    h += '<div><b>Mastery</b></div>';
+    h += '<div>Chords: '+Math.round(getAverageMastery("chords")*100)+'%</div>';
+    h += '<div>Rhythm: '+Math.round(getAverageMastery("rhythm")*100)+'%</div>';
+    h += '<div>Transitions: '+Math.round(getAverageMastery("transitions")*100)+'%</div>';
+    h += '<div>Scales: '+Math.round(getAverageMastery("scales")*100)+'%</div>';
+    h += '</div>';
+  }
+
+  return h;
 }

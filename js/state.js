@@ -25,7 +25,12 @@ var PERSIST = [
   // Practice plan
   "practicePlan","practicePlanDate","practicePlanHistory",
   // Audio
-  "reverbAmount","metronomeSound","a4Tuning","pitchDetectionMode"
+  "reverbAmount","metronomeSound","a4Tuning","pitchDetectionMode",
+  // Brain systems – weak spots, adaptive, progress, mastery, unlocks
+  "weakSpots","practiceHistory","adaptiveState",
+  "weeklyPracticePlan","practiceStreak","lastPracticeDate",
+  "totalPracticeMinutes","todayPracticeMinutes",
+  "mastery","unlocks"
 ];
 
 // Consolidated timer object (like ChordSpark's T)
@@ -240,6 +245,24 @@ var S = {
   practicePlanComplete:false,
   practicePlanHistory:[],
   practicePlanFocus:"",
+
+  // Brain systems – weak spots, adaptive difficulty, progress tracking
+  weakSpots: { transitions:{}, chords:{}, rhythm:{}, phrases:{} },
+  adaptiveState: {},
+  practiceHistory: [],
+  weeklyPracticePlan: null,
+  practiceStreak: 0,
+  lastPracticeDate: null,
+  totalPracticeMinutes: 0,
+  todayPracticeMinutes: 0,
+
+  // Mastery & progression
+  mastery: {
+    chords:{}, transitions:{}, rhythm:{},
+    scales:{}, fingers:{}, songs:{}, lessons:{}
+  },
+  unlocks: { lessons:{}, songs:{}, exercises:{} },
+  progressionTree: null,
 };
 
 // Debounced save — prevents localStorage thrashing on rapid actions
@@ -284,13 +307,18 @@ function loadState() {
       bpm:"number", quizTotal:"number",
       fingerExercisesDone:"number", fingerDaysLogged:"number",
       midiEnabled:"boolean",
-      reverbAmount:"number", a4Tuning:"number"
+      reverbAmount:"number", a4Tuning:"number",
+      practiceStreak:"number", totalPracticeMinutes:"number",
+      todayPracticeMinutes:"number"
     };
     var arrayFields = ["earned","history","customSets","songsDone",
                        "completedSessions","stylePrefs","interleavedChords",
-                       "lastReviewChords","surpriseQueue","fingerBadges"];
-    var objectFields = ["chordProg","transitionStats","personalBests","fingerStats"];
-    var stringFields = ["practiceIntention","tone","lastPractice","metronomeSound","pitchDetectionMode"];
+                       "lastReviewChords","surpriseQueue","fingerBadges",
+                       "practiceHistory"];
+    var objectFields = ["chordProg","transitionStats","personalBests","fingerStats",
+                        "weakSpots","adaptiveState","mastery","unlocks"];
+    var stringFields = ["practiceIntention","tone","lastPractice","metronomeSound",
+                        "pitchDetectionMode","lastPracticeDate"];
 
     // Filter obj to only validated fields, then apply
     var validated = {};
@@ -327,6 +355,18 @@ function loadState() {
   // Ensure finger exercise state
   if (!Array.isArray(S.fingerBadges)) S.fingerBadges = [];
   if (typeof S.fingerStats !== "object" || S.fingerStats === null) S.fingerStats = {};
+  // Ensure brain system state
+  if (!Array.isArray(S.practiceHistory)) S.practiceHistory = [];
+  if (typeof S.weakSpots !== "object" || S.weakSpots === null) {
+    S.weakSpots = { transitions:{}, chords:{}, rhythm:{}, phrases:{} };
+  }
+  if (typeof S.adaptiveState !== "object" || S.adaptiveState === null) S.adaptiveState = {};
+  if (typeof S.mastery !== "object" || S.mastery === null) {
+    S.mastery = { chords:{}, transitions:{}, rhythm:{}, scales:{}, fingers:{}, songs:{}, lessons:{} };
+  }
+  if (typeof S.unlocks !== "object" || S.unlocks === null) {
+    S.unlocks = { lessons:{}, songs:{}, exercises:{} };
+  }
 
   checkStreak();
   // Reset daily counter if date has changed (so dashboard shows 0 before first practice)
